@@ -1,0 +1,26 @@
+
+export default {
+    "locale": "en-US",
+    "header.title.part1": "Reserve with",
+    "header.title.part2": "AI",
+    "header.subtitle": "Your intelligent booking assistant.",
+    "nav.book": "Book a Table",
+    "form.name.label": "Full Name",
+    "form.contact.label": "Email / Phone",
+    "form.date.label": "Date",
+    "form.time.label": "Time",
+    "form.adults.label": "Adults",
+    "form.children.label": "Children (Opt.)",
+    "form.notification.label": "Notification Preferences",
+    "form.submit.button": "Request Booking with AI",
+    "error.nameContact": "Please fill in your name and contact information.",
+    "error.time": "Please select a time slot.",
+    "error.adults": "There must be at least one adult.",
+    "error.notification": "Please select at least one notification method.",
+    "loader.booking": "Our AI is processing your request...",
+    "modal.title": "Request Sent!",
+    "modal.subtitle": "Your request is pending confirmation. You'll be notified once it's approved by the restaurant.",
+    "modal.summary": "<strong class=\"font-semibold text-amber-400\">{name}</strong>, for a party of <strong class=\"font-semibold text-amber-400\">{count}</strong> on <strong class=\"font-semibold text-amber-400\">{date}</strong> at <strong class=\"font-semibold text-amber-400\">{time}</strong>.",
+    "modal.aiPrompt": "The AI has prepared these messages, which will be sent upon confirmation:",
+    "modal.newRequestButton": "Make Another Request"
+};

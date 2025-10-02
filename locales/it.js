@@ -1,0 +1,26 @@
+
+export default {
+    "locale": "it-IT",
+    "header.title.part1": "Prenota con",
+    "header.title.part2": "l'IA",
+    "header.subtitle": "Il tuo assistente intelligente per le prenotazioni.",
+    "nav.book": "Prenota",
+    "form.name.label": "Nome Completo",
+    "form.contact.label": "Email / Telefono",
+    "form.date.label": "Data",
+    "form.time.label": "Orario",
+    "form.adults.label": "Adulti",
+    "form.children.label": "Bambini (Opz.)",
+    "form.notification.label": "Preferenze di Notifica",
+    "form.submit.button": "Richiedi Prenotazione con IA",
+    "error.nameContact": "Per favore, inserisci il tuo nome e un contatto.",
+    "error.time": "Per favore, seleziona un orario.",
+    "error.adults": "Deve esserci almeno un adulto.",
+    "error.notification": "Per favore, seleziona almeno un metodo di notifica.",
+    "loader.booking": "L'IA sta elaborando la tua richiesta...",
+    "modal.title": "Richiesta Inviata!",
+    "modal.subtitle": "La tua richiesta è in attesa di conferma. Riceverai una notifica non appena verrà approvata dal ristorante.",
+    "modal.summary": "<strong class=\"font-semibold text-amber-400\">{name}</strong>, per <strong class=\"font-semibold text-amber-400\">{count}</strong> persone il <strong class=\"font-semibold text-amber-400\">{date}</strong> alle <strong class=\"font-semibold text-amber-400\">{time}</strong>.",
+    "modal.aiPrompt": "L'IA ha preparato questi messaggi, che verranno inviati al momento della conferma:",
+    "modal.newRequestButton": "Fai un'altra Richiesta"
+};
