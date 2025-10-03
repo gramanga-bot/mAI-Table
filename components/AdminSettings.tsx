@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { DayOfWeek, AdminSettings as AdminSettingsType, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, Plan, Theme } from '../types';
 import Icon from './Icon';
 import ThemeSelector from './ThemeSelector';
@@ -252,21 +252,66 @@ const AdminSettingsBasic: React.FC<AdminSettingsProps> = ({ settings, onUpdateSe
 };
 
 const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSettings, onBack }) => {
+    const [saveMessage, setSaveMessage] = useState('');
+    const saveTimeoutRef = useRef<number | null>(null);
+
+    // This wrapper function shows the save confirmation message
+    const handleSettingChange = (update: Partial<AdminSettingsType>) => {
+        onUpdateSettings(update);
+        setSaveMessage('Impostazioni salvate!');
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+        saveTimeoutRef.current = window.setTimeout(() => setSaveMessage(''), 2500);
+    };
+
     return (
         <div className="bg-[var(--background-secondary)] p-6 rounded-xl border border-[var(--border-primary)] space-y-8">
-            <PlanSelector activePlan={settings.activePlan} onSelect={plan => onUpdateSettings({ activePlan: plan })} />
+            {saveMessage && (
+                <div className="fixed top-28 left-1/2 -translate-x-1/2 z-20 p-3 mb-4 bg-[var(--positive-background)] text-[var(--positive-text)] text-sm font-semibold rounded-lg text-center transition-all duration-300 shadow-lg animate-fade-in-down">
+                    {saveMessage}
+                    <style>{`@keyframes fade-in-down { 0% { opacity: 0; transform: translate(-50%, -20px); } 100% { opacity: 1; transform: translate(-50%, 0); } } .animate-fade-in-down { animation: fade-in-down 0.3s ease-out forwards; }`}</style>
+                </div>
+            )}
 
+            <PlanSelector activePlan={settings.activePlan} onSelect={plan => handleSettingChange({ activePlan: plan })} />
+
+            <div className="space-y-4">
+                <h3 className="text-xl font-bold text-[var(--text-primary)]">Informazioni Generali</h3>
+                 <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                    <div className="space-y-4">
+                        <div>
+                            <label htmlFor="restaurantName" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Nome Ristorante</label>
+                            <input id="restaurantName" type="text" value={settings.restaurantName} onChange={(e) => handleSettingChange({ restaurantName: e.target.value })}
+                                className="w-full bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                        </div>
+                        <div>
+                            <label htmlFor="restaurantAddress" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Indirizzo Ristorante</label>
+                            <input id="restaurantAddress" type="text" value={settings.restaurantAddress} onChange={(e) => handleSettingChange({ restaurantAddress: e.target.value })}
+                                placeholder="Es. Via Roma, 1, 10121 Torino TO"
+                                className="w-full bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                        </div>
+                        <div>
+                            <label htmlFor="reviewLink" className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Easystar Review Link</label>
+                            <input id="reviewLink" type="url" value={settings.reviewLink} onChange={(e) => handleSettingChange({ reviewLink: e.target.value })}
+                                placeholder="https://..."
+                                className="w-full bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div className="space-y-4">
                 <h3 className="text-xl font-bold text-[var(--text-primary)]">Aspetto</h3>
                 <ThemeSelector
                     currentTheme={settings.theme}
-                    onThemeChange={theme => onUpdateSettings({ theme })}
+                    onThemeChange={theme => handleSettingChange({ theme })}
                 />
             </div>
             
             {settings.activePlan === Plan.PRO
-                ? <AdminSettingsPro settings={settings} onUpdateSettings={onUpdateSettings} onBack={onBack} />
-                : <AdminSettingsBasic settings={settings} onUpdateSettings={onUpdateSettings} onBack={onBack} />
+                ? <AdminSettingsPro settings={settings} onUpdateSettings={handleSettingChange} onBack={onBack} />
+                : <AdminSettingsBasic settings={settings} onUpdateSettings={handleSettingChange} onBack={onBack} />
             }
             
             <div className="pt-4 border-t border-[var(--border-primary)]/50">

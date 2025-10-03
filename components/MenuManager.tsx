@@ -515,7 +515,7 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
         
         <input type="file" ref={addPhotoInputRef} onChange={handleAddFromPhoto} accept="image/*" capture="environment" className="hidden" multiple />
 
-        {isPreviewOpen && <MenuPreview menu={localMenu} onClose={() => setIsPreviewOpen(false)} />}
+        {isPreviewOpen && <MenuPreview menu={localMenu} onClose={() => setIsPreviewOpen(false)} restaurantName={settings.restaurantName} restaurantAddress={settings.restaurantAddress} />}
         
         {editingTagsItem && (
              <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">

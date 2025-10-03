@@ -127,6 +127,9 @@ const App: React.FC = () => {
     const [settings, setSettings] = useState<AdminSettingsType>(() => {
         const savedSettings = localStorage.getItem('restaurantSettings');
         const defaultSettings: AdminSettingsType = {
+            restaurantName: 'The Golden Spoon',
+            restaurantAddress: 'Via Roma, 1, 10121 Torino TO, Italia',
+            reviewLink: '',
             activePlan: Plan.PRO,
             theme: Theme.GOLDEN_SPOON,
             // Shared settings
@@ -222,7 +225,7 @@ const App: React.FC = () => {
         setBookings(prev => [...prev, newBooking]);
 
         try {
-            const messages = await generateBookingRequestMessages(newBooking);
+            const messages = await generateBookingRequestMessages(newBooking, settings.restaurantName, settings.restaurantAddress, language, t('locale'));
             setConfirmationMessages(messages);
             setStep(AppStep.CONFIRMED);
         } catch (err) {
@@ -233,7 +236,7 @@ const App: React.FC = () => {
         } finally {
             setIsLoading(false);
         }
-    }, [bookings, settings]);
+    }, [bookings, settings, language, t]);
 
     const handleUpdateBookingStatus = useCallback(async (bookingId: string, status: BookingStatus) => {
         const bookingToUpdate = bookings.find(b => b.id === bookingId);
@@ -245,7 +248,7 @@ const App: React.FC = () => {
             setIsLoading(true);
             setError(null);
             try {
-                const finalMessages = await generateBookingConfirmationMessages(bookingToUpdate);
+                const finalMessages = await generateBookingConfirmationMessages(bookingToUpdate, settings.restaurantName, settings.restaurantAddress, settings.reviewLink, language, t('locale'));
                 setNotificationContent({ details: bookingToUpdate, messages: finalMessages });
                 setIsNotificationModalOpen(true);
                 setBookings(prev => prev.map(b => (b.id === bookingId ? { ...b, status } : b)));
@@ -256,7 +259,7 @@ const App: React.FC = () => {
                 setIsLoading(false);
             }
         }
-    }, [bookings]);
+    }, [bookings, settings, language, t]);
 
     const handleNewBooking = useCallback(() => {
         setStep(AppStep.FORM);
@@ -300,7 +303,7 @@ const App: React.FC = () => {
         <>
             <header className="text-center mb-8">
                 <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-accent)] tracking-tight">
-                    The Golden Spoon
+                    {settings.restaurantName}
                 </h1>
                 <p className="text-[var(--text-secondary)] mt-2 text-lg">{t('header.subtitle')}</p>
             </header>
@@ -313,6 +316,8 @@ const App: React.FC = () => {
                     weeklySchedule={settings.weeklySchedule}
                     getGroupedSlotsForDate={getGroupedSlotsForDate}
                     activePlan={settings.activePlan}
+                    restaurantName={settings.restaurantName}
+                    restaurantAddress={settings.restaurantAddress}
                 />
             </main>
         </>
@@ -371,7 +376,7 @@ const App: React.FC = () => {
                     {/* Logo and Name */}
                     <div className="flex items-center justify-center gap-3">
                        <Icon name="logo" className="w-8 h-8 text-[var(--text-accent)]" />
-                       <span className="text-xl font-bold text-[var(--text-primary)]">The Golden Spoon</span>
+                       <span className="text-xl font-bold text-[var(--text-primary)]">{settings.restaurantName}</span>
                     </div>
                     
                     {/* Actions container */}

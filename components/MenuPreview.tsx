@@ -5,6 +5,8 @@ import Icon from './Icon';
 interface MenuPreviewProps {
     menu: DigitalMenu | null;
     onClose: () => void;
+    restaurantName: string;
+    restaurantAddress: string;
 }
 
 const TagIcon: React.FC<{ tag: Allergen | DietaryProfile, size?: 'sm' | 'md' }> = ({ tag, size = 'sm' }) => {
@@ -36,7 +38,7 @@ const TagIcon: React.FC<{ tag: Allergen | DietaryProfile, size?: 'sm' | 'md' }> 
 };
 
 
-const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
+const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose, restaurantName, restaurantAddress }) => {
     const [activeDietaryFilters, setActiveDietaryFilters] = useState<Set<DietaryProfile>>(new Set());
     const [isLegendOpen, setIsLegendOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(true);
@@ -148,8 +150,9 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
 
                 <main className="flex-grow overflow-y-auto p-6 md:p-8">
                     <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-[var(--text-accent)] tracking-tight">The Golden Spoon</h1>
-                        <p className="text-[var(--text-secondary)] mt-2 text-lg">Il Nostro Menù</p>
+                        <h1 className="text-4xl font-bold text-[var(--text-accent)] tracking-tight">{restaurantName}</h1>
+                        <p className="text-[var(--text-secondary)] mt-1 text-md">{restaurantAddress}</p>
+                        <p className="text-[var(--text-secondary)] mt-3 text-lg">Il Nostro Menù</p>
                     </div>
 
                     <div className="space-y-10">

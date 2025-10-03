@@ -23,6 +23,8 @@ interface BookingFormProps {
     weeklySchedule: WeeklySchedule;
     getGroupedSlotsForDate: (date: string) => GroupedTimeSlot[];
     activePlan: Plan;
+    restaurantName: string;
+    restaurantAddress: string;
 }
 
 const dayLabels: Record<DayOfWeek, string> = {
@@ -40,7 +42,8 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
 const BookingForm: React.FC<BookingFormProps> = ({ 
     onBook, initialDetails, error, t, 
-    weeklySchedule, getGroupedSlotsForDate, activePlan
+    weeklySchedule, getGroupedSlotsForDate, activePlan,
+    restaurantName, restaurantAddress
 }) => {
     const [name, setName] = useState(initialDetails?.name || '');
     const [email, setEmail] = useState(initialDetails?.email || '');
@@ -320,9 +323,9 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 config: {
                     responseModalities: [Modality.AUDIO],
                     tools: [{ functionDeclarations: [updateBookingDetailsFunctionDeclaration, finalizeBookingFunctionDeclaration] }],
-                    systemInstruction: `You are a highly precise and efficient voice assistant for booking a table at 'The Golden Spoon'. Your goal is to fill the booking form with 100% accuracy. Guide the user by asking for one piece of information at a time. The current date is ${formattedToday}. Use this for relative dates (e.g., 'domani'). Follow these steps meticulously:
+                    systemInstruction: `You are a highly precise and efficient voice assistant for booking a table at '${restaurantName}', located at '${restaurantAddress}'. Your goal is to fill the booking form with 100% accuracy. Guide the user by asking for one piece of information at a time. The current date is ${formattedToday}. Use this for relative dates (e.g., 'domani'). Follow these steps meticulously:
 
-1.  **GREET**: Immediately greet the user and start the process. (e.g., "Ciao, benvenuto a The Golden Spoon. La guiderò nella prenotazione.").
+1.  **GREET**: Immediately greet the user and start the process. (e.g., "Ciao, benvenuto a ${restaurantName}. La guiderò nella prenotazione.").
 2.  **GUESTS**: Ask for the number of adults first, then ask if there are any children. (e.g., "Per quanti adulti desidera prenotare? ... Perfetto, ci sono anche dei bambini?").
 3.  **DATE**: Ask for the desired date. You MUST convert it to YYYY-MM-DD format. After updating, you will receive the available slots for that day in the tool response. Use them for the next step.
 4.  **TIME**: Ask for the time. Inform the user of the available slots for the date they chose. (e.g., "Per quella data, gli orari disponibili sono: [slots]. Quale preferisce?").

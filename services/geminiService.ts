@@ -39,18 +39,20 @@ const responseSchema = {
 };
 
 
-export const generateBookingRequestMessages = async (details: BookingDetails): Promise<ConfirmationMessages> => {
+export const generateBookingRequestMessages = async (details: BookingDetails, restaurantName: string, restaurantAddress: string, language: string, locale: string): Promise<ConfirmationMessages> => {
     const { name, date, time, adults, children } = details;
     const totalGuests = adults + children;
+    const outputLanguage = language === 'it' ? 'Italian' : 'English';
     
     const prompt = `
 A customer has requested a restaurant reservation. This is a pending request, not yet confirmed.
 - Name: ${name}
-- Date: ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+- Date: ${new Date(date).toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 - Time: ${time}
 - Party Size: ${totalGuests} (${adults} adults${children > 0 ? `, ${children} children` : ''})
 
 Generate messages acknowledging that their booking *request* has been received and is pending confirmation.
+For the email, also include the restaurant's address: ${restaurantAddress}. Add a Google Maps link for directions using this format: 'https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantAddress)}'.
 `;
 
     try {
@@ -58,7 +60,7 @@ Generate messages acknowledging that their booking *request* has been received a
             model: "gemini-2.5-flash",
             contents: prompt,
             config: {
-                systemInstruction: "You are a helpful and creative booking assistant for the restaurant 'The Golden Spoon'. Your task is to generate messages that are friendly, clear, and tailored to different communication platforms. The user's booking is a REQUEST and is PENDING, so do not confirm it yet.",
+                systemInstruction: `You are a helpful and creative booking assistant for the restaurant '${restaurantName}' located at '${restaurantAddress}'. Your task is to generate messages that are friendly, clear, and tailored to different communication platforms. The user's booking is a REQUEST and is PENDING, so do not confirm it yet. All output must be in ${outputLanguage}.`,
                 responseMimeType: "application/json",
                 responseSchema,
             },
@@ -75,30 +77,36 @@ Generate messages acknowledging that their booking *request* has been received a
     }
 };
 
-export const generateBookingConfirmationMessages = async (details: BookingDetails): Promise<ConfirmationMessages> => {
+export const generateBookingConfirmationMessages = async (details: BookingDetails, restaurantName: string, restaurantAddress: string, reviewLink: string, language: string, locale: string): Promise<ConfirmationMessages> => {
     const { name, date, time, adults, children } = details;
     const totalGuests = adults + children;
+    const outputLanguage = language === 'it' ? 'Italian' : 'English';
     
-    const prompt = `
+    let prompt = `
 A restaurant reservation has just been CONFIRMED by the restaurant staff.
 Please generate notification messages to send to the customer informing them of the good news.
 
 Reservation Details:
 - Name: ${name}
-- Date: ${new Date(date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+- Date: ${new Date(date).toLocaleDateString(locale, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
 - Time: ${time}
 - Party Size: ${totalGuests} (${adults} adults${children > 0 ? `, ${children} children` : ''})
 
 The messages should be celebratory and clear.
-For the email, include a concluding sentence like "We look forward to welcoming you."
+For the email, include the restaurant's address ('${restaurantAddress}') and add a call-to-action link like 'Get Directions: https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(restaurantAddress)}'. Also include a concluding sentence like "We look forward to welcoming you."
 `;
+
+    if (reviewLink) {
+        prompt += `
+For the email, please add a P.S. section. In this section, invite the user to leave a review *after their visit*. Phrase it for the future (e.g., 'After your dinner, we'd love to hear your thoughts!'). The link for the review is: ${reviewLink}`;
+    }
 
     try {
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash",
             contents: prompt,
             config: {
-                systemInstruction: "You are an efficient restaurant assistant for 'The Golden Spoon'. Your task is to generate final booking CONFIRMATION messages. The tone should be positive, celebratory, clear, and professional.",
+                systemInstruction: `You are an efficient restaurant assistant for '${restaurantName}' located at '${restaurantAddress}'. Your task is to generate final booking CONFIRMATION messages. The tone should be positive, celebratory, clear, and professional. All output must be in ${outputLanguage}.`,
                 responseMimeType: "application/json",
                 responseSchema,
             },

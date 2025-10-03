@@ -158,6 +158,9 @@ export interface DigitalMenu {
 
 // Unified AdminSettings interface for both plans
 export interface AdminSettings {
+    restaurantName: string;
+    restaurantAddress: string;
+    reviewLink: string;
     activePlan: Plan;
     theme: Theme;
 
