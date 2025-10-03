@@ -1,5 +1,5 @@
 import React, { useState, FormEvent, useEffect, useRef, useCallback } from 'react';
-import { BookingDetails, NotificationPlatform, DayOfWeek, VoiceBookingState, WeeklySchedule, Plan } from '../types';
+import { BookingDetails, NotificationPlatform, DayOfWeek, VoiceBookingState, WeeklySchedule, Plan, GroupedTimeSlot } from '../types';
 import { MAX_ADULTS, MAX_CHILDREN } from '../constants';
 import Icon from './Icon';
 import NumberInput from './NumberInput';
@@ -21,7 +21,7 @@ interface BookingFormProps {
     error: string | null;
     t: (key: string) => string;
     weeklySchedule: WeeklySchedule;
-    getAvailableSlotsForDate: (date: string) => string[];
+    getGroupedSlotsForDate: (date: string) => GroupedTimeSlot[];
     activePlan: Plan;
 }
 
@@ -40,7 +40,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
 
 const BookingForm: React.FC<BookingFormProps> = ({ 
     onBook, initialDetails, error, t, 
-    weeklySchedule, getAvailableSlotsForDate, activePlan
+    weeklySchedule, getGroupedSlotsForDate, activePlan
 }) => {
     const [name, setName] = useState(initialDetails?.name || '');
     const [email, setEmail] = useState(initialDetails?.email || '');
@@ -55,7 +55,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     const [formError, setFormError] = useState('');
     const [voiceState, setVoiceState] = useState<VoiceBookingState>({ status: 'idle', transcript: '' });
     
-    const [availableTimeSlots, setAvailableTimeSlots] = useState<string[]>([]);
+    const [availableTimeSlots, setAvailableTimeSlots] = useState<GroupedTimeSlot[]>([]);
     
     // Refs for audio and session management
     const formRef = useRef<HTMLFormElement>(null);
@@ -70,13 +70,15 @@ const BookingForm: React.FC<BookingFormProps> = ({
     const isVoiceBookingActive = voiceState.status !== 'idle';
     
     useEffect(() => {
-        const slots = getAvailableSlotsForDate(date);
-        setAvailableTimeSlots(slots);
+        const groupedSlots = getGroupedSlotsForDate(date);
+        setAvailableTimeSlots(groupedSlots);
         
-        if (!slots.includes(time)) {
+        // Flatten slots for checking if selected time is still valid
+        const allSlots = groupedSlots.flatMap(group => group.slots);
+        if (!allSlots.includes(time)) {
             setTime('');
         }
-    }, [date, getAvailableSlotsForDate, time]);
+    }, [date, getGroupedSlotsForDate, time]);
 
 
     useEffect(() => {
@@ -194,7 +196,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
             const today = new Date();
             const formattedToday = today.toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            const currentSlots = getAvailableSlotsForDate(date);
+            const currentGroupedSlots = getGroupedSlotsForDate(date);
+            const currentSlots = currentGroupedSlots.flatMap(g => g.slots);
 
             const sessionPromise = ai.live.connect({
                 model: 'gemini-2.5-flash-native-audio-preview-09-2025',
@@ -227,7 +230,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
                                     if (args.date) {
                                         const newDate = args.date as string;
                                         setDate(newDate);
-                                        const newSlots = getAvailableSlotsForDate(newDate);
+                                        const newGroupedSlots = getGroupedSlotsForDate(newDate);
+                                        const newSlots = newGroupedSlots.flatMap(g => g.slots);
                                         // We can inform the model about the new available slots in the tool response
                                         sessionPromise.then((session) => {
                                             session.sendToolResponse({
@@ -367,7 +371,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
     return (
         <div className="bg-[var(--background-secondary)] p-8 rounded-2xl shadow-2xl shadow-black/30 border border-[var(--border-primary)] w-full transition-all duration-300">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-[var(--text-primary)]">Dettagli Prenotazione</h2>
+                <h2 className="text-2xl font-bold text-[var(--text-primary)] uppercase">PRENOTA ORA</h2>
                 {activePlan === Plan.PRO && (
                     <button
                         type="button"
@@ -419,7 +423,11 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
                 <div>
                     <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">{t('form.time.label')}</label>
-                    <TimeSlotPicker selectedTime={time} onSelectTime={setTime} timeSlots={availableTimeSlots} />
+                    <TimeSlotPicker 
+                        selectedTime={time} 
+                        onSelectTime={setTime} 
+                        groupedTimeSlots={availableTimeSlots} 
+                    />
                 </div>
 
                 <div>

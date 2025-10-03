@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType, Theme } from './types';
+import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType, Theme, GroupedTimeSlot } from './types';
 import BookingForm from './components/BookingForm';
 import ConfirmationModal from './components/ConfirmationModal';
 import AdminDashboard from './components/AdminDashboard';
@@ -272,29 +272,28 @@ const App: React.FC = () => {
         setView(targetView);
     };
     
-    const getAvailableSlotsForDate = useCallback((date: string): string[] => {
+    const getGroupedSlotsForDate = useCallback((date: string): GroupedTimeSlot[] => {
         const dayOfWeek = new Date(date).getUTCDay().toString() as DayOfWeek;
         const activeWindowIds = settings.weeklySchedule[dayOfWeek] || [];
         
         if (activeWindowIds.length === 0) return [];
-
-        let allSlots: string[] = [];
 
         const activeWindows = activeWindowIds
             .map(id => settings.serviceWindows.find(sw => sw.id === id))
             .filter((sw): sw is ServiceWindow => !!sw)
             .sort((a,b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime));
 
-        for (const window of activeWindows) {
+        return activeWindows.map(window => {
+            const slots: string[] = [];
             const start = timeToMinutes(window.startTime);
             const end = timeToMinutes(window.endTime);
             for (let t = start; t <= end; t += window.slotInterval) {
                 const hours = Math.floor(t / 60).toString().padStart(2, '0');
                 const minutes = (t % 60).toString().padStart(2, '0');
-                allSlots.push(`${hours}:${minutes}`);
+                slots.push(`${hours}:${minutes}`);
             }
-        }
-        return allSlots;
+            return { name: window.name, slots };
+        });
     }, [settings.weeklySchedule, settings.serviceWindows]);
 
     const renderCustomerView = () => (
@@ -312,7 +311,7 @@ const App: React.FC = () => {
                     error={error} 
                     t={t}
                     weeklySchedule={settings.weeklySchedule}
-                    getAvailableSlotsForDate={getAvailableSlotsForDate}
+                    getGroupedSlotsForDate={getGroupedSlotsForDate}
                     activePlan={settings.activePlan}
                 />
             </main>

@@ -13,7 +13,7 @@ export default {
     "form.adults.label": "Adulti",
     "form.children.label": "Bambini (Opz.)",
     "form.notification.label": "Preferenze di Notifica",
-    "form.submit.button": "Richiedi Prenotazione con IA",
+    "form.submit.button": "INVIA RICHIESTA",
     "error.name": "Per favore, inserisci il tuo nome.",
     "error.email": "Per favore, inserisci un indirizzo email valido.",
     "error.phone": "Per favore, inserisci un numero di telefono.",

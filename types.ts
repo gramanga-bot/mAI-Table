@@ -100,6 +100,12 @@ export interface ServiceWindow {
 
 export type WeeklySchedule = Record<DayOfWeek, string[]>; // Maps DayOfWeek to an array of ServiceWindow IDs
 
+// New interface for grouped time slots
+export interface GroupedTimeSlot {
+    name: string;
+    slots: string[];
+}
+
 // New Allergen and Dietary Types
 export enum Allergen {
     Gluten = "Glutine",

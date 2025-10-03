@@ -13,7 +13,7 @@ export default {
     "form.adults.label": "Adults",
     "form.children.label": "Children (Opt.)",
     "form.notification.label": "Notification Preferences",
-    "form.submit.button": "Request Booking with AI",
+    "form.submit.button": "SEND REQUEST",
     "error.name": "Please fill in your name.",
     "error.email": "Please enter a valid email address.",
     "error.phone": "Please enter a phone number.",
