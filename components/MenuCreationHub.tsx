@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { AdminSettings as AdminSettingsType, DigitalMenu, MenuCategory, MenuItem } from '../types';
 import Icon from './Icon';
@@ -21,15 +22,18 @@ type GeneratedCategory = Omit<MenuCategory, 'id' | 'items'> & {
     items: (Omit<MenuItem, 'id' | 'isAvailable'>)[]
 }
 
+declare var pdfjsLib: any;
+
 const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) => {
-    const [activeMethod, setActiveMethod] = useState<'text' | 'photo' | null>(null);
+    const [activeMethod, setActiveMethod] = useState<'text' | 'photo' | 'file' | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
     const [menuText, setMenuText] = useState('');
     const [progress, setProgress] = useState(0);
     const [progressMessage, setProgressMessage] = useState('');
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const photoInputRef = useRef<HTMLInputElement>(null);
+    const genericFileInputRef = useRef<HTMLInputElement>(null);
 
     // Progress bar effect
     React.useEffect(() => {
@@ -108,9 +112,93 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
         } catch (err) {
             console.error(err);
             setError("L'IA non è riuscita a leggere il menù dalle foto. Assicurati che le immagini siano chiare e ben illuminate.");
-        } finally {
             setIsLoading(false);
+        } finally {
              if (event.target) event.target.value = '';
+        }
+    };
+
+    const handleGenericFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+    
+        setIsLoading(true);
+        setError('');
+        setActiveMethod('file');
+    
+        const resetInput = () => {
+            if (event.target) event.target.value = '';
+        };
+    
+        const handleError = (message: string) => {
+            setError(message);
+            setIsLoading(false);
+            resetInput();
+        };
+    
+        if (file.type === 'application/pdf' && typeof pdfjsLib === 'undefined') {
+            handleError("La libreria per i PDF non è ancora pronta. Attendi un istante e ricarica la pagina.");
+            return;
+        }
+    
+        try {
+            if (file.type.startsWith('image/')) {
+                setProgressMessage("Analizzo l'immagine...");
+                const imageData = await fileToBase64(file).then(data => ({ data, mimeType: file.type }));
+                const generatedCategories = await generateMenuFromImage([imageData]);
+                setProgressMessage("Impagino il tuo menù...");
+                handleMenuCreationSuccess(generatedCategories as GeneratedCategory[]);
+                resetInput();
+            } else if (file.type === 'application/pdf') {
+                setProgressMessage("Estraggo testo dal PDF...");
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        if (!e.target?.result) throw new Error("File reader result is null.");
+                        const typedarray = new Uint8Array(e.target.result as ArrayBuffer);
+                        const pdf = await pdfjsLib.getDocument({ data: typedarray }).promise;
+                        let fullText = '';
+                        for (let i = 1; i <= pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const textContent = await page.getTextContent();
+                            const pageText = textContent.items.map((item: any) => item.str).join(' ');
+                            fullText += pageText + '\n\n';
+                        }
+                        setProgressMessage("L'IA sta analizzando il testo...");
+                        const generatedCategories = await generateMenuFromText(fullText);
+                        handleMenuCreationSuccess(generatedCategories as GeneratedCategory[]);
+                        resetInput();
+                    } catch (pdfError) {
+                        console.error("PDF processing error:", pdfError);
+                        handleError("Impossibile leggere il file PDF. Potrebbe essere corrotto o protetto.");
+                    }
+                };
+                reader.onerror = () => handleError("Errore nella lettura del file.");
+                reader.readAsArrayBuffer(file);
+            } else if (file.type.startsWith('text/')) {
+                 setProgressMessage("Leggo il file di testo...");
+                 const reader = new FileReader();
+                 reader.onload = async (e) => {
+                    try {
+                        if (!e.target?.result) throw new Error("File reader result is null.");
+                        const text = e.target.result as string;
+                        setProgressMessage("L'IA sta analizzando il testo...");
+                        const generatedCategories = await generateMenuFromText(text);
+                        handleMenuCreationSuccess(generatedCategories as GeneratedCategory[]);
+                        resetInput();
+                    } catch (textError) {
+                        console.error("Text processing error:", textError);
+                        handleError("Impossibile analizzare il file di testo.");
+                    }
+                 };
+                 reader.onerror = () => handleError("Errore nella lettura del file.");
+                 reader.readAsText(file);
+            } else {
+                handleError(`Tipo di file non supportato: ${file.type || 'sconosciuto'}. Usa immagini, PDF o file .txt.`);
+            }
+        } catch (err: any) {
+            console.error(err);
+            handleError(err.message || "Si è verificato un errore imprevisto.");
         }
     };
 
@@ -127,8 +215,7 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
         icon: React.ComponentProps<typeof Icon>['name'],
         title: string,
         description: string,
-        onClick: () => void,
-        method: 'photo' | 'text' | 'scratch'
+        onClick: () => void
     ) => (
         <button
             onClick={onClick}
@@ -141,9 +228,13 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
     );
 
     if (isLoading) {
+        let iconName: React.ComponentProps<typeof Icon>['name'] = 'sparkles';
+        if (activeMethod === 'photo') iconName = 'camera';
+        if (activeMethod === 'file') iconName = 'file-text';
+        
         return (
             <div className="max-w-4xl mx-auto bg-gray-800/70 p-8 rounded-xl border border-gray-700 text-center">
-                <Icon name={activeMethod === 'photo' ? 'camera' : 'sparkles'} className="w-16 h-16 text-amber-400 mx-auto mb-4 animate-pulse" />
+                <Icon name={iconName} className="w-16 h-16 text-amber-400 mx-auto mb-4 animate-pulse" />
                 <h2 className="text-3xl font-bold text-white mb-4">Un attimo di pazienza...</h2>
                 <div className="space-y-2">
                     <div className="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
@@ -188,42 +279,52 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
     }
 
     return (
-        <div className="max-w-4xl mx-auto text-center">
+        <div className="max-w-5xl mx-auto text-center">
             <Icon name="book-open" className="w-16 h-16 text-amber-400 mx-auto mb-4" />
             <h2 className="text-3xl font-bold text-white mb-2">Come vuoi creare il tuo Menù?</h2>
             <p className="text-gray-400 mb-8 max-w-2xl mx-auto">Scegli il metodo più comodo per te. La nostra IA ti assisterà in ogni caso per rendere il processo semplice e veloce.</p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {renderCard(
                     'camera',
                     'Crea da Foto',
-                    'Scatta una o più foto al tuo menù cartaceo. L\'IA estrarrà testo e prezzi automaticamente.',
-                    () => fileInputRef.current?.click(),
-                    'photo'
+                    'Scatta o carica una o più foto del menù. L\'IA estrarrà testo e prezzi automaticamente.',
+                    () => photoInputRef.current?.click()
+                )}
+                 {renderCard(
+                    'file-text',
+                    'Crea da File',
+                    'Carica un file PDF o di testo. L\'IA lo leggerà e costruirà il menù digitale per te.',
+                    () => genericFileInputRef.current?.click()
                 )}
                 {renderCard(
                     'sparkles',
                     'Incolla Testo',
-                    'Hai già un menù in formato testo? Incollalo e lascia che l\'IA faccia il lavoro di formattazione.',
-                    () => setActiveMethod('text'),
-                    'text'
+                    'Hai già un menù in formato testo? Incollalo e lascia che l\'IA lo formatti per te.',
+                    () => setActiveMethod('text')
                 )}
                 {renderCard(
                     'pencil',
                     'Inizia da Zero',
                     'Parti da una tela bianca e costruisci il tuo menù passo dopo passo con il nostro editor.',
-                    handleStartFromScratch,
-                    'scratch'
+                    handleStartFromScratch
                 )}
             </div>
             <input
                 type="file"
-                ref={fileInputRef}
+                ref={photoInputRef}
                 onChange={handlePhotoUpload}
                 accept="image/*"
                 capture="environment"
                 className="hidden"
                 multiple
+            />
+             <input
+                type="file"
+                ref={genericFileInputRef}
+                onChange={handleGenericFileUpload}
+                accept=".pdf,.txt,.text/plain,image/*"
+                className="hidden"
             />
         </div>
     );
