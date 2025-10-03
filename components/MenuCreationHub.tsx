@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { AdminSettings as AdminSettingsType, DigitalMenu, MenuCategory } from '../types';
+import { AdminSettings as AdminSettingsType, DigitalMenu, MenuCategory, MenuItem } from '../types';
 import Icon from './Icon';
 import { generateMenuFromText, generateMenuFromImage } from '../services/geminiService';
 
@@ -16,6 +16,10 @@ const fileToBase64 = (file: File): Promise<string> => {
         reader.onerror = error => reject(error);
     });
 };
+
+type GeneratedCategory = Omit<MenuCategory, 'id' | 'items'> & {
+    items: (Omit<MenuItem, 'id' | 'isAvailable'>)[]
+}
 
 const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) => {
     const [activeMethod, setActiveMethod] = useState<'text' | 'photo' | null>(null);
@@ -45,7 +49,7 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
         }
     }, [isLoading]);
 
-    const handleMenuCreationSuccess = (generatedCategories: Omit<MenuCategory, 'id'>[]) => {
+    const handleMenuCreationSuccess = (generatedCategories: GeneratedCategory[]) => {
         const newMenu: DigitalMenu = {
             showPrices: true,
             dishesOfTheDay: [],
@@ -56,7 +60,6 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
                     ...item,
                     id: `item-${Date.now()}-${Math.random()}`,
                     isAvailable: true,
-                    ingredients: item.description,
                 }))
             }))
         };
@@ -73,7 +76,7 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
         setProgressMessage("L'IA sta analizzando il testo...");
         try {
             const generatedCategories = await generateMenuFromText(menuText);
-            handleMenuCreationSuccess(generatedCategories);
+            handleMenuCreationSuccess(generatedCategories as GeneratedCategory[]);
         } catch (err) {
             console.error(err);
             setError("L'IA non è riuscita a generare il menù. Prova a modificare il testo o riprova più tardi.");
@@ -101,7 +104,7 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
             setProgressMessage("Estraggo il testo...");
             const generatedCategories = await generateMenuFromImage(imagesData);
             setProgressMessage("Impagino il tuo menù...");
-            handleMenuCreationSuccess(generatedCategories);
+            handleMenuCreationSuccess(generatedCategories as GeneratedCategory[]);
         } catch (err) {
             console.error(err);
             setError("L'IA non è riuscita a leggere il menù dalle foto. Assicurati che le immagini siano chiare e ben illuminate.");

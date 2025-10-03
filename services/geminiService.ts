@@ -1,5 +1,6 @@
+
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
-import { BookingDetails, ConfirmationMessages, MenuCategory } from '../types';
+import { BookingDetails, ConfirmationMessages, MenuCategory, Allergen, DietaryProfile, MenuItem } from '../types';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set");
@@ -148,7 +149,98 @@ const menuSchema = {
     },
 };
 
-export const generateMenuFromText = async (menuText: string): Promise<Omit<MenuCategory, 'id'>[]> => {
+const allergenMap: Record<Allergen, string[]> = {
+    [Allergen.Gluten]: ["grano", "farina", "pane", "pasta", "orzo", "farro", "kamut", "segale", "couscous", "pangrattato", "semola", "semolino", "seitan", "triticum", "glutine"],
+    [Allergen.Crustaceans]: ["gambero", "gamberi", "scampo", "scampi", "aragosta", "granchio", "mazzancolle", "canocchie"],
+    [Allergen.Eggs]: ["uovo", "uova", "maionese", "zabaione", "albumina", "ovomucoide", "lisozima", "frittata"],
+    [Allergen.Fish]: ["pesce", "acciuga", "acciughe", "tonno", "salmone", "merluzzo", "sarda", "sarde", "trota", "sogliola", "spada", "branzino", "orata", "cernia"],
+    [Allergen.Peanuts]: ["arachidi", "burro di arachidi", "olio di arachidi"],
+    [Allergen.Soy]: ["soia", "edamame", "tofu", "miso", "salsa di soia", "tempeh"],
+    [Allergen.Milk]: ["latte", "lattosio", "formaggio", "yogurt", "burro", "panna", "caseina", "ricotta", "mozzarella", "parmigiano", "grana", "pecorino", "caciocavallo"],
+    [Allergen.Nuts]: ["mandorla", "mandorle", "nocciola", "nocciole", "noce", "noci", "anacardi", "pistacchio", "pistacchi", "noci di macadamia", "noci pecan"],
+    [Allergen.Celery]: ["sedano"],
+    [Allergen.Mustard]: ["senape"],
+    [Allergen.Sesame]: ["sesamo", "tahina", "tahin"],
+    [Allergen.Sulphites]: ["solfiti", "anidride solforosa", "vino"],
+    [Allergen.Lupin]: ["lupini"],
+    [Allergen.Molluscs]: ["vongola", "vongole", "cozza", "cozze", "ostrica", "ostriche", "calamaro", "calamari", "seppia", "seppie", "polpo"],
+};
+
+const nonVegetarianKeywords = [
+    ...allergenMap[Allergen.Fish], ...allergenMap[Allergen.Crustaceans], ...allergenMap[Allergen.Molluscs],
+    'carne', 'pollo', 'manzo', 'prosciutto', 'salsiccia', 'maiale', 'agnello', 'vitello', 'bistecca', 'speck', 'pancetta', 'guanciale', 'bresaola', 'salame'
+];
+
+const nonVeganKeywords = [
+    ...nonVegetarianKeywords, ...allergenMap[Allergen.Eggs], ...allergenMap[Allergen.Milk],
+    'miele'
+];
+
+export const analyzeIngredientsForTags = (ingredients: string): { allergens: Allergen[], dietaryProfiles: DietaryProfile[] } => {
+    const text = ingredients.toLowerCase();
+    const detectedAllergens = new Set<Allergen>();
+    const dietaryProfiles = new Set<DietaryProfile>();
+
+    for (const [allergen, keywords] of Object.entries(allergenMap)) {
+        for (const keyword of keywords) {
+            if (text.includes(keyword)) {
+                detectedAllergens.add(allergen as Allergen);
+                break;
+            }
+        }
+    }
+
+    let isVegetarian = true;
+    for (const keyword of nonVegetarianKeywords) {
+        if (text.includes(keyword)) {
+            isVegetarian = false;
+            break;
+        }
+    }
+
+    if (isVegetarian) {
+        dietaryProfiles.add(DietaryProfile.Vegetarian);
+        let isVegan = true;
+        for (const keyword of nonVeganKeywords) {
+            if (text.includes(keyword)) {
+                isVegan = false;
+                break;
+            }
+        }
+        if (isVegan) {
+            dietaryProfiles.add(DietaryProfile.Vegan);
+        }
+    }
+
+    if (!detectedAllergens.has(Allergen.Gluten)) {
+        dietaryProfiles.add(DietaryProfile.GlutenFree);
+    }
+
+    return {
+        allergens: Array.from(detectedAllergens).sort(),
+        dietaryProfiles: Array.from(dietaryProfiles).sort(),
+    };
+};
+
+// FIX: Wrapped the type in parentheses to correctly define it as an array of objects, fixing type inference issues.
+const enrichMenuWithTags = (categories: (Omit<MenuCategory, 'id' | 'items'> & { items: Omit<MenuItem, 'id' | 'isAvailable' | 'ingredients' | 'allergens' | 'dietaryProfiles'>[] })[]) => {
+    return categories.map(cat => ({
+        ...cat,
+        items: cat.items.map(item => {
+            const combinedTextForAnalysis = `${item.name} ${item.description}`;
+            const tags = analyzeIngredientsForTags(combinedTextForAnalysis);
+            return {
+                ...item,
+                ingredients: item.description,
+                allergens: tags.allergens,
+                dietaryProfiles: tags.dietaryProfiles,
+            };
+        }),
+    }));
+};
+
+
+export const generateMenuFromText = async (menuText: string): Promise<ReturnType<typeof enrichMenuWithTags>> => {
     const prompt = `
 Parse the following restaurant menu text and structure it into a JSON format.
 Identify categories, and for each category, list the dishes with their name, price, and description.
@@ -173,7 +265,7 @@ ${menuText}
         
         const jsonStr = response.text.trim();
         const parsedResponse = JSON.parse(jsonStr);
-        return parsedResponse as Omit<MenuCategory, 'id'>[];
+        return enrichMenuWithTags(parsedResponse);
 
     } catch (error) {
         console.error("Gemini API call for menu generation failed:", error);
@@ -181,7 +273,7 @@ ${menuText}
     }
 };
 
-export const generateMenuFromImage = async (images: {data: string, mimeType: string}[]): Promise<Omit<MenuCategory, 'id'>[]> => {
+export const generateMenuFromImage = async (images: {data: string, mimeType: string}[]): Promise<ReturnType<typeof enrichMenuWithTags>> => {
     const prompt = `
 Parse the restaurant menu in the provided images (which could be multiple pages of the same menu) and structure it into a single, unified JSON format.
 Identify categories, and for each category, list the dishes with their name, price, and description.
@@ -213,7 +305,7 @@ Combine dishes from the same category found across different images into a singl
         
         const jsonStr = response.text.trim();
         const parsedResponse = JSON.parse(jsonStr);
-        return parsedResponse as Omit<MenuCategory, 'id'>[];
+        return enrichMenuWithTags(parsedResponse);
 
     } catch (error) {
         console.error("Gemini API call for menu generation from image failed:", error);

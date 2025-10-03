@@ -92,6 +92,30 @@ export interface ServiceWindow {
 
 export type WeeklySchedule = Record<DayOfWeek, string[]>; // Maps DayOfWeek to an array of ServiceWindow IDs
 
+// New Allergen and Dietary Types
+export enum Allergen {
+    Gluten = "Glutine",
+    Crustaceans = "Crostacei",
+    Eggs = "Uova",
+    Fish = "Pesce",
+    Peanuts = "Arachidi",
+    Soy = "Soia",
+    Milk = "Latte",
+    Nuts = "Frutta a guscio",
+    Celery = "Sedano",
+    Mustard = "Senape",
+    Sesame = "Sesamo",
+    Sulphites = "Anidride solforosa e solfiti",
+    Lupin = "Lupini",
+    Molluscs = "Molluschi",
+}
+
+export enum DietaryProfile {
+    Vegetarian = "Vegetariano",
+    Vegan = "Vegano",
+    GlutenFree = "Senza Glutine",
+}
+
 // Digital Menu Types
 export interface MenuItem {
     id: string;
@@ -100,6 +124,8 @@ export interface MenuItem {
     price?: number;
     ingredients: string; // comma-separated for simplicity
     isAvailable: boolean;
+    allergens: Allergen[];
+    dietaryProfiles: DietaryProfile[];
 }
 
 export interface MenuCategory {
