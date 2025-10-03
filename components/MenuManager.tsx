@@ -421,11 +421,13 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
     if (!localMenu) {
         return <MenuCreationHub onUpdateSettings={onUpdateSettings} />;
     }
+
+    const hasItems = localMenu.categories.some(cat => cat.items.length > 0);
     
     return (
         <>
         <div className="space-y-8 max-w-6xl mx-auto">
-             {showAiTip && (
+             {showAiTip && hasItems && (
                 <div className="bg-blue-900/50 border border-blue-700 text-blue-300 p-4 rounded-lg flex items-start gap-4 transition-all duration-300">
                     <Icon name="info-circle" className="w-8 h-8 text-blue-400 flex-shrink-0 mt-1" />
                     <div className="flex-grow">
@@ -444,7 +446,18 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
             )}
 
             <div className="flex justify-between items-center flex-wrap gap-4">
-                <h2 className="text-3xl font-bold text-[var(--text-primary)]">Gestione Menù</h2>
+                <div className="flex items-center gap-4">
+                    <h2 className="text-3xl font-bold text-[var(--text-primary)]">Gestione Menù</h2>
+                    {!hasItems && (
+                        <button 
+                            onClick={() => onUpdateSettings({ digitalMenu: null })} 
+                            className="bg-[var(--background-tertiary)] text-[var(--text-secondary)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--background-interactive)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 text-sm"
+                        >
+                            <Icon name="refresh" className="w-4 h-4" />
+                            Cambia Metodo
+                        </button>
+                    )}
+                </div>
                 <div className="flex items-center gap-3">
                      <button onClick={() => addPhotoInputRef.current?.click()} disabled={isAddingFromPhoto} className="bg-[var(--background-tertiary)] text-[var(--text-primary)] font-bold py-2 px-6 rounded-lg hover:bg-[var(--background-interactive)] transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait">
                        <Icon name="camera" className="w-5 h-5" />

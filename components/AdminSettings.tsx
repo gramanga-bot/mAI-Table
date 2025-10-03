@@ -328,13 +328,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSetting
     const renderProSettings = () => (
         <>
             <OpeningHoursManager settings={settings} onUpdateSettings={handleSettingChange} />
-            <DisabledSectionWrapper isDisabled={true} planName="BASIC">
-                <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
-                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>Capienza Massima</h3>
-                    <label htmlFor="maxGuests" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Numero massimo di coperti totali per ogni fascia oraria</label>
-                    <input id="maxGuests" type="number" value={settings.maxGuestsPerSlot} onChange={handleMaxGuestsChange} min="1" className="w-full bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
-                </div>
-            </DisabledSectionWrapper>
             {renderProFeatures()}
         </>
     );

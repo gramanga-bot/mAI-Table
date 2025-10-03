@@ -202,12 +202,16 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
     };
 
     const handleStartFromScratch = () => {
-        const emptyMenu: DigitalMenu = {
+        const newMenu: DigitalMenu = {
             showPrices: true,
             dishesOfTheDay: [],
-            categories: [],
+            categories: [{
+                id: `cat-${Date.now()}`,
+                name: 'NUOVA CATEGORIA',
+                items: [],
+            }],
         };
-        onUpdateSettings({ digitalMenu: emptyMenu });
+        onUpdateSettings({ digitalMenu: newMenu });
     };
 
     const renderCard = (
