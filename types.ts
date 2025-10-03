@@ -13,7 +13,8 @@ export enum BookingStatus {
 export interface BookingDetails {
     id: string;
     name: string;
-    contact: string;
+    email: string;
+    phone: string;
     date: string;
     time: string;
     adults: number;
@@ -53,6 +54,13 @@ export enum DayOfWeek {
 export enum Plan {
     BASIC = 'BASIC',
     PRO = 'PRO',
+}
+
+export enum Theme {
+    GOLDEN_SPOON = 'golden-spoon',
+    MIDNIGHT_SLATE = 'midnight-slate',
+    CLASSIC_IVORY = 'classic-ivory',
+    TUSCAN_CREAM = 'tuscan-cream',
 }
 
 // New interfaces for table management
@@ -145,6 +153,7 @@ export interface DigitalMenu {
 // Unified AdminSettings interface for both plans
 export interface AdminSettings {
     activePlan: Plan;
+    theme: Theme;
 
     // Shared Settings for opening hours
     serviceWindows: ServiceWindow[];

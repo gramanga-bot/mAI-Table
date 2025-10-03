@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface TimeSlotPickerProps {
@@ -17,8 +16,8 @@ const TimeSlotPicker: React.FC<TimeSlotPickerProps> = ({ selectedTime, onSelectT
                     onClick={() => onSelectTime(slot)}
                     className={`p-3 rounded-lg border-2 text-center font-semibold transition-all duration-200 ${
                         selectedTime === slot
-                            ? 'bg-amber-500/10 border-amber-500 text-amber-400'
-                            : 'bg-gray-700/50 border-gray-600 hover:border-gray-500'
+                            ? 'bg-[var(--accent-secondary)] border-[var(--accent-secondary-border)] text-[var(--text-accent)]'
+                            : 'bg-[var(--background-tertiary)]/50 border-[var(--border-secondary)] hover:border-[var(--border-primary)]'
                     }`}
                 >
                     {slot}

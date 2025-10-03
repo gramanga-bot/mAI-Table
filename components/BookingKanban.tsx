@@ -1,4 +1,3 @@
-
 import React, { useMemo } from 'react';
 import { BookingDetails, BookingStatus } from '../types';
 import BookingCard from './BookingCard';
@@ -19,11 +18,11 @@ const BookingKanban: React.FC<BookingKanbanProps> = ({ bookings, onUpdateStatus 
 
     return (
         <div className="w-full max-w-4xl mx-auto h-full">
-            <div className="bg-gray-800/70 rounded-xl flex flex-col">
-                <div className={`flex items-center gap-3 p-4 border-b-2 border-amber-500/50`}>
-                   <Icon name="dots-horizontal" className={`w-6 h-6 text-amber-400`} />
-                   <h2 className={`text-xl font-bold text-white`}>Richieste in Attesa</h2>
-                   <span className={`ml-2 bg-amber-500/20 text-amber-300 text-sm font-semibold px-2.5 py-0.5 rounded-full`}>
+            <div className="bg-[var(--background-secondary)] rounded-xl flex flex-col">
+                <div className={`flex items-center gap-3 p-4 border-b-2 border-[var(--accent-secondary-border)]/50`}>
+                   <Icon name="dots-horizontal" className={`w-6 h-6 text-[var(--text-accent)]`} />
+                   <h2 className={`text-xl font-bold text-[var(--text-primary)]`}>Richieste in Attesa</h2>
+                   <span className={`ml-2 bg-[var(--accent-secondary)] text-[var(--text-accent)] text-sm font-semibold px-2.5 py-0.5 rounded-full`}>
                        {pendingBookings.length}
                    </span>
                 </div>
@@ -34,7 +33,7 @@ const BookingKanban: React.FC<BookingKanbanProps> = ({ bookings, onUpdateStatus 
                         ))
                     ) : (
                         <div className="text-center py-10">
-                            <p className="text-gray-500">Nessuna prenotazione in attesa.</p>
+                            <p className="text-[var(--text-secondary)]">Nessuna prenotazione in attesa.</p>
                         </div>
                     )}
                 </div>

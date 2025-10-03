@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { DayOfWeek, AdminSettings as AdminSettingsType, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, Plan } from '../types';
+import { DayOfWeek, AdminSettings as AdminSettingsType, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, Plan, Theme } from '../types';
 import Icon from './Icon';
+import ThemeSelector from './ThemeSelector';
 
 interface AdminSettingsProps {
     settings: AdminSettingsType;
@@ -20,17 +21,17 @@ const dayLabels: Record<DayOfWeek, string> = {
 const dayOrder: DayOfWeek[] = [DayOfWeek.MONDAY, DayOfWeek.TUESDAY, DayOfWeek.WEDNESDAY, DayOfWeek.THURSDAY, DayOfWeek.FRIDAY, DayOfWeek.SATURDAY, DayOfWeek.SUNDAY];
 
 const PlanSelector: React.FC<{ activePlan: Plan; onSelect: (plan: Plan) => void }> = ({ activePlan, onSelect }) => (
-    <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-        <h3 className="text-xl font-bold text-white mb-3">Seleziona il tuo piano</h3>
-        <div className="flex items-center gap-2 bg-gray-800 p-1 rounded-lg">
-            <button onClick={() => onSelect(Plan.BASIC)} className={`w-full py-2 text-sm font-semibold rounded-md transition-colors ${activePlan === Plan.BASIC ? 'bg-amber-500 text-gray-900' : 'text-gray-300 hover:bg-gray-700'}`}>
+    <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+        <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3">Seleziona il tuo piano</h3>
+        <div className="flex items-center gap-2 bg-[var(--background-secondary)] p-1 rounded-lg">
+            <button onClick={() => onSelect(Plan.BASIC)} className={`w-full py-2 text-sm font-semibold rounded-md transition-colors ${activePlan === Plan.BASIC ? 'bg-[var(--accent-primary)] text-[var(--accent-text)]' : 'text-[var(--text-secondary)] hover:bg-[var(--background-interactive)]'}`}>
                 BASIC
             </button>
-            <button onClick={() => onSelect(Plan.PRO)} className={`w-full py-2 text-sm font-semibold rounded-md transition-colors ${activePlan === Plan.PRO ? 'bg-amber-500 text-gray-900' : 'text-gray-300 hover:bg-gray-700'}`}>
+            <button onClick={() => onSelect(Plan.PRO)} className={`w-full py-2 text-sm font-semibold rounded-md transition-colors ${activePlan === Plan.PRO ? 'bg-[var(--accent-primary)] text-[var(--accent-text)]' : 'text-[var(--text-secondary)] hover:bg-[var(--background-interactive)]'}`}>
                 PRO
             </button>
         </div>
-        <p className="text-xs text-gray-500 mt-2">
+        <p className="text-xs text-[var(--text-secondary)]/80 mt-2">
             {activePlan === Plan.BASIC
                 ? 'Ideale per una gestione semplice basata sul numero totale di coperti.'
                 : 'Gestione avanzata con tavoli, combinazioni e regole di durata.'
@@ -66,43 +67,43 @@ const OpeningHoursManager: React.FC<Pick<AdminSettingsProps, 'settings' | 'onUpd
     
     return (
         <div className="space-y-4">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2"><Icon name="clock" className="w-6 h-6 text-amber-400"/>Orari di Apertura e Fasce di Servizio</h3>
-            <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                <h4 className="font-semibold text-gray-300 mb-3">1. Definisci le Fasce di Servizio</h4>
+            <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="clock" className="w-6 h-6 text-[var(--text-accent)]"/>Orari di Apertura e Fasce di Servizio</h3>
+            <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                <h4 className="font-semibold text-[var(--text-secondary)] mb-3">1. Definisci le Fasce di Servizio</h4>
                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
-                    <input type="text" placeholder="Nome (es. Pranzo)" value={swName} onChange={e => setSwName(e.target.value)} className="md:col-span-2 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
-                    <input type="time" title="Orario Inizio" value={swStartTime} onChange={e => setSwStartTime(e.target.value)} className="bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
-                    <input type="time" title="Orario Fine" value={swEndTime} onChange={e => setSwEndTime(e.target.value)} className="bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
-                    <input type="number" title="Intervallo Slot (min)" value={swInterval} onChange={e => setSwInterval(parseInt(e.target.value, 10))} min="15" step="15" className="bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+                    <input type="text" placeholder="Nome (es. Pranzo)" value={swName} onChange={e => setSwName(e.target.value)} className="md:col-span-2 bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                    <input type="time" title="Orario Inizio" value={swStartTime} onChange={e => setSwStartTime(e.target.value)} className="bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                    <input type="time" title="Orario Fine" value={swEndTime} onChange={e => setSwEndTime(e.target.value)} className="bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                    <input type="number" title="Intervallo Slot (min)" value={swInterval} onChange={e => setSwInterval(parseInt(e.target.value, 10))} min="15" step="15" className="bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
                 </div>
-                <button onClick={handleAddServiceWindow} className="mt-3 w-full md:w-auto bg-amber-500/80 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-500 text-sm">Aggiungi Fascia</button>
+                <button onClick={handleAddServiceWindow} className="mt-3 w-full md:w-auto bg-[var(--accent-primary)]/80 text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary)] text-sm">Aggiungi Fascia</button>
                 <div className="mt-4 flex flex-wrap gap-2">
                     {settings.serviceWindows.map(sw => (
-                        <div key={sw.id} className="flex items-center gap-2 bg-gray-700 rounded-full px-3 py-1 text-sm font-semibold text-white">
+                        <div key={sw.id} className="flex items-center gap-2 bg-[var(--background-tertiary)] rounded-full px-3 py-1 text-sm font-semibold text-[var(--text-primary)]">
                             {sw.name} ({sw.startTime}-{sw.endTime})
-                            <button onClick={() => handleRemoveServiceWindow(sw.id)} className="text-red-400 hover:text-red-300"><Icon name="x-circle" className="w-4 h-4" /></button>
+                            <button onClick={() => handleRemoveServiceWindow(sw.id)} className="text-[var(--negative)] hover:text-[var(--negative-text)]"><Icon name="x-circle" className="w-4 h-4" /></button>
                         </div>
                     ))}
                 </div>
             </div>
-            <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                <h4 className="font-semibold text-gray-300 mb-3">2. Applica le Fasce all'Orario Settimanale</h4>
+            <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                <h4 className="font-semibold text-[var(--text-secondary)] mb-3">2. Applica le Fasce all'Orario Settimanale</h4>
                 <div className="space-y-3">
                     {dayOrder.map(day => (
-                        <div key={day} className="flex items-center justify-between p-2 rounded-md bg-gray-800/50">
-                            <span className="font-semibold text-white w-28">{dayLabels[day]}</span>
+                        <div key={day} className="flex items-center justify-between p-2 rounded-md bg-[var(--background-secondary)]/50">
+                            <span className="font-semibold text-[var(--text-primary)] w-28">{dayLabels[day]}</span>
                             <div className="flex items-center gap-4">
                                 {settings.serviceWindows.length > 0 ? settings.serviceWindows.map(sw => (
-                                    <label key={sw.id} className="flex items-center gap-2 text-gray-300 cursor-pointer">
-                                        <input type="checkbox" checked={settings.weeklySchedule[day]?.includes(sw.id)} onChange={() => handleScheduleChange(day, sw.id)} className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-600"/>
+                                    <label key={sw.id} className="flex items-center gap-2 text-[var(--text-secondary)] cursor-pointer">
+                                        <input type="checkbox" checked={settings.weeklySchedule[day]?.includes(sw.id)} onChange={() => handleScheduleChange(day, sw.id)} className="custom-checkbox h-4 w-4 rounded focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-secondary)] focus:ring-[var(--accent-primary)]"/>
                                         {sw.name}
                                     </label>
-                                )) : <p className="text-xs text-gray-500">Nessuna fascia definita</p>}
+                                )) : <p className="text-xs text-[var(--text-secondary)]/80">Nessuna fascia definita</p>}
                             </div>
                             {settings.weeklySchedule[day]?.length === 0 || !settings.weeklySchedule[day] ? (
-                                <span className="text-xs font-bold text-red-400 bg-red-500/10 px-2 py-1 rounded-full">CHIUSO</span>
+                                <span className="text-xs font-bold text-[var(--negative)] bg-[var(--negative-background)] px-2 py-1 rounded-full">CHIUSO</span>
                             ) : (
-                                <span className="text-xs font-bold text-green-400 bg-green-500/10 px-2 py-1 rounded-full">APERTO</span>
+                                <span className="text-xs font-bold text-[var(--positive)] bg-[var(--positive-background)] px-2 py-1 rounded-full">APERTO</span>
                             )}
                         </div>
                     ))}
@@ -153,24 +154,24 @@ const AdminSettingsPro: React.FC<AdminSettingsProps> = ({ settings, onUpdateSett
 
             {/* Table Management */}
             <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-amber-400"/>Gestione Sala e Tavoli</h3>
-                <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                    <h4 className="font-semibold text-gray-300 mb-3">Aggiungi un nuovo tavolo</h4>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>Gestione Sala e Tavoli</h3>
+                <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                    <h4 className="font-semibold text-[var(--text-secondary)] mb-3">Aggiungi un nuovo tavolo</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
-                        <input type="text" placeholder="Nome (es. T1)" value={newTableName} onChange={e => setNewTableName(e.target.value)} className="md:col-span-2 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500"/>
-                        <input type="number" placeholder="Capienza" value={newTableCapacity} onChange={e => setNewTableCapacity(parseInt(e.target.value, 10))} min="1" className="bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+                        <input type="text" placeholder="Nome (es. T1)" value={newTableName} onChange={e => setNewTableName(e.target.value)} className="md:col-span-2 bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none"/>
+                        <input type="number" placeholder="Capienza" value={newTableCapacity} onChange={e => setNewTableCapacity(parseInt(e.target.value, 10))} min="1" className="bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
                         <div className="flex items-center gap-2 h-full">
-                           <input id="isCombinable" type="checkbox" checked={isCombinable} onChange={e => setIsCombinable(e.target.checked)} className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-600"/>
-                           <label htmlFor="isCombinable" className="text-sm text-gray-400">Combinabile</label>
+                           <input id="isCombinable" type="checkbox" checked={isCombinable} onChange={e => setIsCombinable(e.target.checked)} className="custom-checkbox h-4 w-4 rounded focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-secondary)] focus:ring-[var(--accent-primary)]"/>
+                           <label htmlFor="isCombinable" className="text-sm text-[var(--text-secondary)]">Combinabile</label>
                         </div>
                     </div>
-                     <button onClick={handleAddTable} className="mt-3 w-full md:w-auto bg-amber-500/80 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-500 text-sm">Aggiungi Tavolo</button>
+                     <button onClick={handleAddTable} className="mt-3 w-full md:w-auto bg-[var(--accent-primary)]/80 text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary)] text-sm">Aggiungi Tavolo</button>
                 </div>
                 <div className="max-h-48 overflow-y-auto space-y-2 pr-2">
                    {settings.tables.map(table => (
-                        <div key={table.id} className="flex items-center justify-between bg-gray-700/50 p-2 rounded-md">
-                            <p className="text-white font-semibold">{table.name} - <span className="text-amber-400">{table.capacity}p</span> <span className="text-gray-400 text-xs">{table.isCombinable ? '(Combinabile)' : ''}</span></p>
-                            <button onClick={() => handleRemoveTable(table.id)} className="text-red-400 hover:text-red-300 p-1"><Icon name="x-circle" className="w-5 h-5"/></button>
+                        <div key={table.id} className="flex items-center justify-between bg-[var(--background-tertiary)]/50 p-2 rounded-md">
+                            <p className="text-[var(--text-primary)] font-semibold">{table.name} - <span className="text-[var(--text-accent)]">{table.capacity}p</span> <span className="text-[var(--text-secondary)] text-xs">{table.isCombinable ? '(Combinabile)' : ''}</span></p>
+                            <button onClick={() => handleRemoveTable(table.id)} className="text-[var(--negative)] hover:text-[var(--negative-text)] p-1"><Icon name="x-circle" className="w-5 h-5"/></button>
                         </div>
                    ))}
                 </div>
@@ -178,24 +179,24 @@ const AdminSettingsPro: React.FC<AdminSettingsProps> = ({ settings, onUpdateSett
 
             {/* Combination Rules */}
             <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2"><Icon name="cog" className="w-6 h-6 text-amber-400"/>Regole di Combinazione</h3>
-                <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                    <h4 className="font-semibold text-gray-300 mb-3">Aggiungi regola</h4>
-                    <div className="flex items-center gap-2 text-gray-300 flex-wrap">
+                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="cog" className="w-6 h-6 text-[var(--text-accent)]"/>Regole di Combinazione</h3>
+                <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                    <h4 className="font-semibold text-[var(--text-secondary)] mb-3">Aggiungi regola</h4>
+                    <div className="flex items-center gap-2 text-[var(--text-secondary)] flex-wrap">
                         <span>Unendo</span>
-                        <input type="number" value={ruleCount} onChange={e => setRuleCount(parseInt(e.target.value, 10))} min="2" className="w-16 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+                        <input type="number" value={ruleCount} onChange={e => setRuleCount(parseInt(e.target.value, 10))} min="2" className="w-16 bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
                         <span>tavoli da</span>
-                        <input type="number" value={ruleTableCapacity} onChange={e => setRuleTableCapacity(parseInt(e.target.value, 10))} min="1" className="w-16 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+                        <input type="number" value={ruleTableCapacity} onChange={e => setRuleTableCapacity(parseInt(e.target.value, 10))} min="1" className="w-16 bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
                         <span>persone, la capienza è</span>
-                         <input type="number" value={ruleNewCapacity} onChange={e => setRuleNewCapacity(parseInt(e.target.value, 10))} min="1" className="w-16 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
-                        <button onClick={handleAddRule} className="ml-auto bg-amber-500/80 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-500 text-sm">Aggiungi Regola</button>
+                         <input type="number" value={ruleNewCapacity} onChange={e => setRuleNewCapacity(parseInt(e.target.value, 10))} min="1" className="w-16 bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                        <button onClick={handleAddRule} className="ml-auto bg-[var(--accent-primary)]/80 text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary)] text-sm">Aggiungi Regola</button>
                     </div>
                 </div>
                  <div className="max-h-32 overflow-y-auto space-y-2 pr-2">
                    {settings.combinationRules.map(rule => (
-                        <div key={rule.id} className="flex items-center justify-between bg-gray-700/50 p-2 rounded-md">
-                            <p className="text-white text-sm">Unendo {rule.count} tavoli da {rule.tableCapacity}p, si ottengono {rule.newCapacity} posti.</p>
-                            <button onClick={() => handleRemoveRule(rule.id)} className="text-red-400 hover:text-red-300 p-1"><Icon name="x-circle" className="w-5 h-5"/></button>
+                        <div key={rule.id} className="flex items-center justify-between bg-[var(--background-tertiary)]/50 p-2 rounded-md">
+                            <p className="text-[var(--text-primary)] text-sm">Unendo {rule.count} tavoli da {rule.tableCapacity}p, si ottengono {rule.newCapacity} posti.</p>
+                            <button onClick={() => handleRemoveRule(rule.id)} className="text-[var(--negative)] hover:text-[var(--negative-text)] p-1"><Icon name="x-circle" className="w-5 h-5"/></button>
                         </div>
                    ))}
                 </div>
@@ -203,25 +204,25 @@ const AdminSettingsPro: React.FC<AdminSettingsProps> = ({ settings, onUpdateSett
 
              {/* Duration Rules */}
             <div className="space-y-4">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2"><Icon name="clock" className="w-6 h-6 text-amber-400"/>Gestione Turnover e Durata</h3>
-                <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                    <h4 className="font-semibold text-gray-300 mb-3">Aggiungi regola di durata</h4>
-                    <div className="flex items-center gap-2 text-gray-300 flex-wrap">
+                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="clock" className="w-6 h-6 text-[var(--text-accent)]"/>Gestione Turnover e Durata</h3>
+                <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                    <h4 className="font-semibold text-[var(--text-secondary)] mb-3">Aggiungi regola di durata</h4>
+                    <div className="flex items-center gap-2 text-[var(--text-secondary)] flex-wrap">
                         <span>Da</span>
-                        <input type="number" value={durationMinGuests} onChange={e => setDurationMinGuests(parseInt(e.target.value, 10))} min="1" className="w-16 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+                        <input type="number" value={durationMinGuests} onChange={e => setDurationMinGuests(parseInt(e.target.value, 10))} min="1" className="w-16 bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
                         <span>a</span>
-                        <input type="number" value={durationMaxGuests} onChange={e => setDurationMaxGuests(parseInt(e.target.value, 10))} min={durationMinGuests} className="w-16 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+                        <input type="number" value={durationMaxGuests} onChange={e => setDurationMaxGuests(parseInt(e.target.value, 10))} min={durationMinGuests} className="w-16 bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
                         <span>persone, durata</span>
-                         <input type="number" value={durationMinutes} onChange={e => setDurationMinutes(parseInt(e.target.value, 10))} min="30" step="15" className="w-20 bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+                         <input type="number" value={durationMinutes} onChange={e => setDurationMinutes(parseInt(e.target.value, 10))} min="30" step="15" className="w-20 bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
                         <span>minuti.</span>
-                        <button onClick={handleAddDurationRule} className="ml-auto bg-amber-500/80 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-500 text-sm">Aggiungi</button>
+                        <button onClick={handleAddDurationRule} className="ml-auto bg-[var(--accent-primary)]/80 text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary)] text-sm">Aggiungi</button>
                     </div>
                 </div>
                  <div className="max-h-32 overflow-y-auto space-y-2 pr-2">
                    {settings.bookingDurationRules.sort((a, b) => a.minGuests - b.minGuests).map(rule => (
-                        <div key={rule.id} className="flex items-center justify-between bg-gray-700/50 p-2 rounded-md">
-                            <p className="text-white text-sm">Da {rule.minGuests} a {rule.maxGuests} persone: {rule.durationMinutes} minuti</p>
-                            <button onClick={() => handleRemoveDurationRule(rule.id)} className="text-red-400 hover:text-red-300 p-1"><Icon name="x-circle" className="w-5 h-5"/></button>
+                        <div key={rule.id} className="flex items-center justify-between bg-[var(--background-tertiary)]/50 p-2 rounded-md">
+                            <p className="text-[var(--text-primary)] text-sm">Da {rule.minGuests} a {rule.maxGuests} persone: {rule.durationMinutes} minuti</p>
+                            <button onClick={() => handleRemoveDurationRule(rule.id)} className="text-[var(--negative)] hover:text-[var(--negative-text)] p-1"><Icon name="x-circle" className="w-5 h-5"/></button>
                         </div>
                    ))}
                 </div>
@@ -241,10 +242,10 @@ const AdminSettingsBasic: React.FC<AdminSettingsProps> = ({ settings, onUpdateSe
             <OpeningHoursManager settings={settings} onUpdateSettings={onUpdateSettings} />
             
             {/* Max Guests */}
-            <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-                <h3 className="text-xl font-bold text-white mb-3 flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-amber-400"/>Capienza Massima</h3>
-                <label htmlFor="maxGuests" className="block text-sm font-medium text-gray-400 mb-1">Numero massimo di coperti totali per ogni fascia oraria</label>
-                <input id="maxGuests" type="number" value={settings.maxGuestsPerSlot} onChange={handleMaxGuestsChange} min="1" className="w-full bg-gray-800 border-gray-600 rounded-md p-2 focus:ring-1 focus:ring-amber-500" />
+            <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>Capienza Massima</h3>
+                <label htmlFor="maxGuests" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Numero massimo di coperti totali per ogni fascia oraria</label>
+                <input id="maxGuests" type="number" value={settings.maxGuestsPerSlot} onChange={handleMaxGuestsChange} min="1" className="w-full bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
             </div>
         </div>
     );
@@ -252,16 +253,24 @@ const AdminSettingsBasic: React.FC<AdminSettingsProps> = ({ settings, onUpdateSe
 
 const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSettings, onBack }) => {
     return (
-        <div className="bg-gray-800/70 p-6 rounded-xl border border-gray-700 space-y-8">
+        <div className="bg-[var(--background-secondary)] p-6 rounded-xl border border-[var(--border-primary)] space-y-8">
             <PlanSelector activePlan={settings.activePlan} onSelect={plan => onUpdateSettings({ activePlan: plan })} />
+
+            <div className="space-y-4">
+                <h3 className="text-xl font-bold text-[var(--text-primary)]">Aspetto</h3>
+                <ThemeSelector
+                    currentTheme={settings.theme}
+                    onThemeChange={theme => onUpdateSettings({ theme })}
+                />
+            </div>
             
             {settings.activePlan === Plan.PRO
                 ? <AdminSettingsPro settings={settings} onUpdateSettings={onUpdateSettings} onBack={onBack} />
                 : <AdminSettingsBasic settings={settings} onUpdateSettings={onUpdateSettings} onBack={onBack} />
             }
             
-            <div className="pt-4 border-t border-gray-700/50">
-                <button onClick={onBack} className="w-full bg-amber-500 text-gray-900 font-bold py-3 px-4 rounded-lg hover:bg-amber-400 transition-colors duration-300">
+            <div className="pt-4 border-t border-[var(--border-primary)]/50">
+                <button onClick={onBack} className="w-full bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-3 px-4 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-colors duration-300">
                     Torna alla Dashboard
                 </button>
             </div>

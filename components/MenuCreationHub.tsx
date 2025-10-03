@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { AdminSettings as AdminSettingsType, DigitalMenu, MenuCategory, MenuItem } from '../types';
 import Icon from './Icon';
@@ -219,11 +218,11 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
     ) => (
         <button
             onClick={onClick}
-            className="bg-gray-800/70 p-6 rounded-xl border border-gray-700 text-left w-full h-full flex flex-col hover:border-amber-500 hover:bg-gray-800 transition-all duration-300 transform hover:-translate-y-1 group"
+            className="bg-[var(--background-secondary)] p-6 rounded-xl border border-[var(--border-primary)] text-left w-full h-full flex flex-col hover:border-[var(--accent-primary)] hover:bg-[var(--background-secondary)]/80 transition-all duration-300 transform hover:-translate-y-1 group"
         >
-            <Icon name={icon} className="w-12 h-12 text-amber-400 mb-4" />
-            <h3 className="text-xl font-bold text-white flex-grow">{title}</h3>
-            <p className="text-gray-400 text-sm mt-2">{description}</p>
+            <Icon name={icon} className="w-12 h-12 text-[var(--text-accent)] mb-4" />
+            <h3 className="text-xl font-bold text-[var(--text-primary)] flex-grow">{title}</h3>
+            <p className="text-[var(--text-secondary)] text-sm mt-2">{description}</p>
         </button>
     );
 
@@ -233,13 +232,13 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
         if (activeMethod === 'file') iconName = 'file-text';
         
         return (
-            <div className="max-w-4xl mx-auto bg-gray-800/70 p-8 rounded-xl border border-gray-700 text-center">
-                <Icon name={iconName} className="w-16 h-16 text-amber-400 mx-auto mb-4 animate-pulse" />
-                <h2 className="text-3xl font-bold text-white mb-4">Un attimo di pazienza...</h2>
+            <div className="max-w-4xl mx-auto bg-[var(--background-secondary)] p-8 rounded-xl border border-[var(--border-primary)] text-center">
+                <Icon name={iconName} className="w-16 h-16 text-[var(--text-accent)] mx-auto mb-4 animate-pulse" />
+                <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-4">Un attimo di pazienza...</h2>
                 <div className="space-y-2">
-                    <div className="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
+                    <div className="w-full bg-[var(--background-tertiary)] rounded-full h-4 relative overflow-hidden border border-[var(--border-secondary)]">
                         <div
-                            className="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-300 ease-linear"
+                            className="bg-gradient-to-r from-[var(--text-accent)] to-[var(--accent-primary)] h-full rounded-full transition-all duration-300 ease-linear"
                             style={{ width: `${progress}%` }}
                         ></div>
                         <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference px-2">
@@ -247,29 +246,29 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
                         </span>
                     </div>
                 </div>
-                {error && <p className="text-red-400 text-sm mt-4">{error}</p>}
+                {error && <p className="text-[var(--negative-text)] text-sm mt-4">{error}</p>}
             </div>
         );
     }
     
     if (activeMethod === 'text') {
         return (
-            <div className="max-w-4xl mx-auto bg-gray-800/70 p-8 rounded-xl border border-gray-700">
-                 <button onClick={() => setActiveMethod(null)} className="text-gray-400 hover:text-white mb-4 text-sm flex items-center gap-1">
+            <div className="max-w-4xl mx-auto bg-[var(--background-secondary)] p-8 rounded-xl border border-[var(--border-primary)]">
+                 <button onClick={() => setActiveMethod(null)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] mb-4 text-sm flex items-center gap-1">
                     <Icon name="x-circle" className="w-4 h-4" /> Indietro
                  </button>
-                 <h2 className="text-3xl font-bold text-white mb-2">Incolla il testo del tuo Menù</h2>
-                <p className="text-gray-400 mb-6">La nostra IA lo analizzerà e lo strutturerà per te in pochi secondi.</p>
-                <div className="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+                 <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Incolla il testo del tuo Menù</h2>
+                <p className="text-[var(--text-secondary)] mb-6">La nostra IA lo analizzerà e lo strutturerà per te in pochi secondi.</p>
+                <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
                     <textarea
                         value={menuText}
                         onChange={e => setMenuText(e.target.value)}
                         placeholder="Es: ANTIPASTI - Bruschetta al pomodoro 5€ - Caprese 8€..."
-                        className="w-full h-48 bg-gray-800 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-amber-500 outline-none transition"
+                        className="w-full h-48 bg-[var(--background-secondary)] border-[var(--border-secondary)] rounded-md p-3 focus:ring-2 focus:ring-[var(--accent-primary)] outline-none transition"
                         aria-label="Incolla qui il testo del tuo menù"
                     />
-                     {error && <p className="text-red-400 text-sm mt-2">{error}</p>}
-                    <button onClick={handleGenerateFromText} disabled={isLoading} className="mt-4 w-full flex items-center justify-center gap-2 bg-amber-500 text-gray-900 font-bold py-3 px-4 rounded-lg hover:bg-amber-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                     {error && <p className="text-[var(--negative-text)] text-sm mt-2">{error}</p>}
+                    <button onClick={handleGenerateFromText} disabled={isLoading} className="mt-4 w-full flex items-center justify-center gap-2 bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-3 px-4 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                         <Icon name="sparkles" className="w-5 h-5" />
                         Genera Menù con IA
                     </button>
@@ -280,9 +279,9 @@ const MenuCreationHub: React.FC<MenuCreationHubProps> = ({ onUpdateSettings }) =
 
     return (
         <div className="max-w-5xl mx-auto text-center">
-            <Icon name="book-open" className="w-16 h-16 text-amber-400 mx-auto mb-4" />
-            <h2 className="text-3xl font-bold text-white mb-2">Come vuoi creare il tuo Menù?</h2>
-            <p className="text-gray-400 mb-8 max-w-2xl mx-auto">Scegli il metodo più comodo per te. La nostra IA ti assisterà in ogni caso per rendere il processo semplice e veloce.</p>
+            <Icon name="book-open" className="w-16 h-16 text-[var(--text-accent)] mx-auto mb-4" />
+            <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-2">Come vuoi creare il tuo Menù?</h2>
+            <p className="text-[var(--text-secondary)] mb-8 max-w-2xl mx-auto">Scegli il metodo più comodo per te. La nostra IA ti assisterà in ogni caso per rendere il processo semplice e veloce.</p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {renderCard(

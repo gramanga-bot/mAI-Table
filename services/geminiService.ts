@@ -1,4 +1,5 @@
 
+
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { BookingDetails, ConfirmationMessages, MenuCategory, Allergen, DietaryProfile, MenuItem } from '../types';
 
@@ -321,9 +322,13 @@ export const updateBookingDetailsFunctionDeclaration: FunctionDeclaration = {
     description: 'Updates one or more details for the restaurant booking form based on user input.',
     properties: {
       name: { type: Type.STRING, description: "The full name for the reservation, e.g., 'Mario Rossi'." },
-      contact: { 
-          type: Type.STRING, 
-          description: "The contact detail for confirmation. If it's a phone number, it must be a string of digits with no spaces or symbols. If it's an email, it must be a valid email format, e.g., 'mario.rossi@example.com'." 
+      email: {
+          type: Type.STRING,
+          description: "The guest's email address, e.g., 'mario.rossi@example.com'."
+      },
+      phone: {
+        type: Type.STRING,
+        description: "The guest's phone number, including the international prefix if available, e.g., '+393331234567'."
       },
       date: { type: Type.STRING, description: "The reservation date in strict YYYY-MM-DD format." },
       time: { type: Type.STRING, description: "The reservation time in HH:MM format. Must be an available slot." },

@@ -98,16 +98,16 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm animate-fade-in">
-            <div className="bg-gray-900 text-gray-200 w-full h-full flex flex-col">
-                <header className="p-4 flex justify-between items-center border-b border-gray-700 flex-shrink-0">
-                    <h2 className="text-xl font-bold text-white">Anteprima Menù</h2>
-                    <button onClick={onClose} className="p-2 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                        <Icon name="x-circle" className="w-6 h-6 text-gray-400" />
+            <div className="bg-[var(--background-primary)] text-[var(--text-primary)] w-full h-full flex flex-col">
+                <header className="p-4 flex justify-between items-center border-b border-[var(--border-primary)] flex-shrink-0">
+                    <h2 className="text-xl font-bold text-[var(--text-primary)]">Anteprima Menù</h2>
+                    <button onClick={onClose} className="p-2 rounded-full bg-[var(--background-secondary)] hover:bg-[var(--background-interactive)] transition-colors">
+                        <Icon name="x-circle" className="w-6 h-6 text-[var(--text-secondary)]" />
                     </button>
                 </header>
 
                 {availableDietaryProfiles.length > 0 && (
-                    <div className="flex-shrink-0 p-4 bg-gray-900/80 backdrop-blur-sm border-b border-gray-700 z-10">
+                    <div className="flex-shrink-0 p-4 bg-[var(--background-primary)]/80 backdrop-blur-sm border-b border-[var(--border-primary)] z-10">
                         <button
                             onClick={() => setIsFilterOpen(!isFilterOpen)}
                             className="w-full flex justify-between items-center"
@@ -115,12 +115,12 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
                             aria-controls="filter-content"
                         >
                             <div className="flex items-center gap-2">
-                                <Icon name="filter" className="w-5 h-5 text-amber-400" />
-                                <h4 className="font-bold text-white">Filtra per Esigenze</h4>
+                                <Icon name="filter" className="w-5 h-5 text-[var(--text-accent)]" />
+                                <h4 className="font-bold text-[var(--text-primary)]">Filtra per Esigenze</h4>
                             </div>
                             <Icon
                                 name={isFilterOpen ? 'chevron-up' : 'chevron-down'}
-                                className="w-6 h-6 text-gray-400 transition-transform"
+                                className="w-6 h-6 text-[var(--text-secondary)] transition-transform"
                             />
                         </button>
                         <div
@@ -134,8 +134,8 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
                                         onClick={() => handleFilterToggle(profile)}
                                         className={`px-3 py-1 text-sm font-semibold rounded-full border-2 transition-colors ${
                                             activeDietaryFilters.has(profile) 
-                                                ? 'bg-amber-500/20 border-amber-500 text-amber-300' 
-                                                : 'bg-gray-700/50 border-gray-600 hover:border-gray-500 text-gray-300'
+                                                ? 'bg-[var(--accent-secondary)] border-[var(--accent-secondary-border)] text-[var(--text-accent)]' 
+                                                : 'bg-[var(--background-tertiary)]/50 border-[var(--border-secondary)] hover:border-[var(--border-primary)] text-[var(--text-secondary)]'
                                         }`}
                                     >
                                         {profile}
@@ -148,29 +148,29 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
 
                 <main className="flex-grow overflow-y-auto p-6 md:p-8">
                     <div className="text-center mb-8">
-                        <h1 className="text-4xl font-bold text-amber-400 tracking-tight">The Golden Spoon</h1>
-                        <p className="text-gray-400 mt-2 text-lg">Il Nostro Menù</p>
+                        <h1 className="text-4xl font-bold text-[var(--text-accent)] tracking-tight">The Golden Spoon</h1>
+                        <p className="text-[var(--text-secondary)] mt-2 text-lg">Il Nostro Menù</p>
                     </div>
 
                     <div className="space-y-10">
                         {filteredCategories.length > 0 ? filteredCategories.map(category => (
                             <section key={category.id}>
-                                <h3 className="text-3xl font-bold text-white border-b-2 border-amber-500/50 pb-2 mb-6 uppercase">{category.name}</h3>
+                                <h3 className="text-3xl font-bold text-[var(--text-primary)] border-b-2 border-[var(--accent-primary)]/50 pb-2 mb-6 uppercase">{category.name}</h3>
                                 <div className="space-y-6">
                                     {category.items.map(item => (
                                         <div key={item.id} className={`transition-opacity ${!item.isAvailable ? 'opacity-40' : ''}`}>
                                             <div className="flex justify-between items-start gap-4">
                                                 <div className="flex-grow">
                                                     <div className="flex items-center gap-3">
-                                                        <h4 className="text-xl font-bold text-gray-100">{item.name}</h4>
+                                                        <h4 className="text-xl font-bold text-[var(--text-primary)]">{item.name}</h4>
                                                         {(item.allergens.length > 0 || item.dietaryProfiles.length > 0) &&
                                                             <div className="group relative flex items-center">
-                                                                <Icon name="info-circle" className="w-5 h-5 text-gray-500 cursor-pointer" />
-                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs bg-gray-800 border border-gray-600 text-gray-300 text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                                                                <Icon name="info-circle" className="w-5 h-5 text-[var(--text-secondary)]/80 cursor-pointer" />
+                                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs bg-[var(--background-secondary)] border border-[var(--border-primary)] text-[var(--text-secondary)] text-xs rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
                                                                     <div className="space-y-2">
                                                                         {item.dietaryProfiles.length > 0 && (
                                                                             <div>
-                                                                                <p className="font-bold text-white text-sm">Profili Alimentari:</p>
+                                                                                <p className="font-bold text-[var(--text-primary)] text-sm">Profili Alimentari:</p>
                                                                                 <div className="grid grid-cols-1 gap-x-3 gap-y-1 mt-1">
                                                                                     {item.dietaryProfiles.map(p => (
                                                                                         <div key={p} className="flex items-center gap-1.5">
@@ -182,7 +182,7 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
                                                                         )}
                                                                         {item.allergens.length > 0 && (
                                                                             <div>
-                                                                                <p className="font-bold text-white text-sm mt-1">Allergeni Presenti:</p>
+                                                                                <p className="font-bold text-[var(--text-primary)] text-sm mt-1">Allergeni Presenti:</p>
                                                                                  <div className="grid grid-cols-1 gap-x-3 gap-y-1 mt-1">
                                                                                     {item.allergens.map(a => (
                                                                                         <div key={a} className="flex items-center gap-1.5">
@@ -197,16 +197,16 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
                                                             </div>
                                                         }
                                                     </div>
-                                                    <p className="text-sm text-gray-400 mt-1">{item.ingredients}</p>
+                                                    <p className="text-sm text-[var(--text-secondary)] mt-1">{item.ingredients}</p>
                                                 </div>
                                                 {menu.showPrices && item.price != null && (
-                                                    <p className="text-xl font-bold text-amber-400 whitespace-nowrap">
+                                                    <p className="text-xl font-bold text-[var(--text-accent)] whitespace-nowrap">
                                                         € {item.price.toFixed(2)}
                                                     </p>
                                                 )}
                                             </div>
                                              {!item.isAvailable && (
-                                                <p className="text-xs font-bold text-red-400 bg-red-900/50 px-2 py-0.5 rounded-full inline-block mt-2">
+                                                <p className="text-xs font-bold text-[var(--negative-text)] bg-[var(--negative-background)] px-2 py-0.5 rounded-full inline-block mt-2">
                                                     Esaurito
                                                 </p>
                                             )}
@@ -216,24 +216,24 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
                             </section>
                         )) : (
                             <div className="text-center py-10">
-                                <p className="text-gray-500">Nessun piatto corrisponde ai filtri selezionati.</p>
+                                <p className="text-[var(--text-secondary)]">Nessun piatto corrisponde ai filtri selezionati.</p>
                             </div>
                         )}
                     </div>
                 </main>
 
                 {allTags.length > 0 && (
-                    <footer className="p-4 border-t border-gray-700 flex-shrink-0 bg-gray-900/50">
+                    <footer className="p-4 border-t border-[var(--border-primary)] flex-shrink-0 bg-[var(--background-secondary)]/50">
                         <button
                             onClick={() => setIsLegendOpen(!isLegendOpen)}
                             className="w-full flex justify-between items-center py-2 text-left"
                             aria-expanded={isLegendOpen}
                             aria-controls="legend-content"
                         >
-                            <h4 className="font-bold text-white text-lg">Legenda</h4>
+                            <h4 className="font-bold text-[var(--text-primary)] text-lg">Legenda</h4>
                             <Icon
                                 name={isLegendOpen ? 'chevron-up' : 'chevron-down'}
-                                className="w-6 h-6 text-gray-400 transition-transform duration-300"
+                                className="w-6 h-6 text-[var(--text-secondary)] transition-transform duration-300"
                             />
                         </button>
                         <div
@@ -244,11 +244,11 @@ const MenuPreview: React.FC<MenuPreviewProps> = ({ menu, onClose }) => {
                                {allTags.map(tag => (
                                    <div key={tag} className="flex items-center gap-2">
                                        <TagIcon tag={tag} size="sm" />
-                                       <span className="text-xs text-gray-300">{tag}</span>
+                                       <span className="text-xs text-[var(--text-secondary)]">{tag}</span>
                                    </div>
                                ))}
                             </div>
-                            <p className="text-xs text-gray-500 border-t border-gray-700 pt-3 mt-3">
+                            <p className="text-xs text-[var(--text-secondary)]/80 border-t border-[var(--border-primary)] pt-3 mt-3">
                                 I gentili clienti sono pregati di comunicare al personale di sala eventuali allergie o intolleranze alimentari.
                                 {hasGlutenFreeOption && <span className="font-semibold"> I nostri piatti 'Senza Glutine' sono preparati con ingredienti privi di glutine, ma non possiamo garantire l'assenza di contaminazione crociata in cucina.</span>}
                             </p>

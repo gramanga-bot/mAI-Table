@@ -1,4 +1,3 @@
-
 import React from 'react';
 import Icon from './Icon';
 import { VoiceBookingState } from '../types';
@@ -22,9 +21,9 @@ const VoiceBookingOverlay: React.FC<VoiceBookingOverlayProps> = ({ state, onClos
     return (
         <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 backdrop-blur-sm animate-fade-in">
             <div className="relative w-48 h-48 flex items-center justify-center">
-                {pulse && <div className="absolute inset-0 bg-amber-500/30 rounded-full animate-ping"></div>}
-                <div className={`relative w-32 h-32 bg-gray-800 rounded-full flex items-center justify-center border-4 transition-colors ${state.status === 'listening' ? 'border-amber-500' : 'border-gray-700'}`}>
-                    <Icon name={icon} className="w-16 h-16 text-amber-400" />
+                {pulse && <div className="absolute inset-0 bg-[var(--accent-primary)]/30 rounded-full animate-ping"></div>}
+                <div className={`relative w-32 h-32 bg-[var(--background-secondary)] rounded-full flex items-center justify-center border-4 transition-colors ${state.status === 'listening' ? 'border-[var(--accent-primary)]' : 'border-[var(--border-primary)]'}`}>
+                    <Icon name={icon} className="w-16 h-16 text-[var(--text-accent)]" />
                 </div>
             </div>
             <p className="mt-8 text-xl text-white font-semibold">{text}</p>

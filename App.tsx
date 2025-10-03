@@ -1,5 +1,5 @@
-import React, { useState, useCallback, useMemo } from 'react';
-import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType } from './types';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType, Theme } from './types';
 import BookingForm from './components/BookingForm';
 import ConfirmationModal from './components/ConfirmationModal';
 import AdminDashboard from './components/AdminDashboard';
@@ -124,36 +124,46 @@ const App: React.FC = () => {
     const [language, setLanguage] = useState<Language>('it');
     
     // Unified Settings State
-    const [settings, setSettings] = useState<AdminSettingsType>({
-        activePlan: Plan.PRO,
-        // Shared settings
-        serviceWindows: [
-            { id: 'sw-lunch', name: 'Pranzo', startTime: '12:00', endTime: '14:30', slotInterval: 30 },
-            { id: 'sw-dinner', name: 'Cena', startTime: '19:00', endTime: '22:00', slotInterval: 30 },
-        ],
-        weeklySchedule: {
-            [DayOfWeek.SUNDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.MONDAY]: [], [DayOfWeek.TUESDAY]: ['sw-dinner'],
-            [DayOfWeek.WEDNESDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.THURSDAY]: ['sw-lunch', 'sw-dinner'],
-            [DayOfWeek.FRIDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.SATURDAY]: ['sw-lunch', 'sw-dinner'],
-        },
-        // Digital Menu
-        digitalMenu: null,
-        // PRO settings
-        tables: Array.from({ length: 10 }, (_, i) => ({
-            id: `t4-${i + 1}`, name: `Tavolo ${i + 1}`, capacity: 4, isCombinable: true,
-        })),
-        combinationRules: [
-            { id: 'rule-1', count: 2, tableCapacity: 4, newCapacity: 6 },
-            { id: 'rule-2', count: 3, tableCapacity: 4, newCapacity: 8 },
-        ],
-        bookingDurationRules: [
-            { id: 'dur-1', minGuests: 1, maxGuests: 2, durationMinutes: 90 },
-            { id: 'dur-2', minGuests: 3, maxGuests: 4, durationMinutes: 120 },
-            { id: 'dur-3', minGuests: 5, maxGuests: 100, durationMinutes: 150 },
-        ],
-        // BASIC settings
-        maxGuestsPerSlot: 30,
+    const [settings, setSettings] = useState<AdminSettingsType>(() => {
+        const savedSettings = localStorage.getItem('restaurantSettings');
+        const defaultSettings: AdminSettingsType = {
+            activePlan: Plan.PRO,
+            theme: Theme.GOLDEN_SPOON,
+            // Shared settings
+            serviceWindows: [
+                { id: 'sw-lunch', name: 'Pranzo', startTime: '12:00', endTime: '14:30', slotInterval: 30 },
+                { id: 'sw-dinner', name: 'Cena', startTime: '19:00', endTime: '22:00', slotInterval: 30 },
+            ],
+            weeklySchedule: {
+                [DayOfWeek.SUNDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.MONDAY]: [], [DayOfWeek.TUESDAY]: ['sw-dinner'],
+                [DayOfWeek.WEDNESDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.THURSDAY]: ['sw-lunch', 'sw-dinner'],
+                [DayOfWeek.FRIDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.SATURDAY]: ['sw-lunch', 'sw-dinner'],
+            },
+            // Digital Menu
+            digitalMenu: null,
+            // PRO settings
+            tables: Array.from({ length: 10 }, (_, i) => ({
+                id: `t4-${i + 1}`, name: `Tavolo ${i + 1}`, capacity: 4, isCombinable: true,
+            })),
+            combinationRules: [
+                { id: 'rule-1', count: 2, tableCapacity: 4, newCapacity: 6 },
+                { id: 'rule-2', count: 3, tableCapacity: 4, newCapacity: 8 },
+            ],
+            bookingDurationRules: [
+                { id: 'dur-1', minGuests: 1, maxGuests: 2, durationMinutes: 90 },
+                { id: 'dur-2', minGuests: 3, maxGuests: 4, durationMinutes: 120 },
+                { id: 'dur-3', minGuests: 5, maxGuests: 100, durationMinutes: 150 },
+            ],
+            // BASIC settings
+            maxGuestsPerSlot: 30,
+        };
+        return savedSettings ? { ...defaultSettings, ...JSON.parse(savedSettings) } : defaultSettings;
     });
+
+    useEffect(() => {
+        document.body.dataset.theme = settings.theme;
+        localStorage.setItem('restaurantSettings', JSON.stringify(settings));
+    }, [settings]);
 
     const handleSettingsUpdate = useCallback((newSettings: Partial<AdminSettingsType>) => {
         setSettings(prev => ({ ...prev, ...newSettings }));
@@ -290,10 +300,10 @@ const App: React.FC = () => {
     const renderCustomerView = () => (
         <>
             <header className="text-center mb-8">
-                <h1 className="text-4xl md:text-5xl font-bold text-amber-400 tracking-tight">
+                <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-accent)] tracking-tight">
                     The Golden Spoon
                 </h1>
-                <p className="text-gray-400 mt-2 text-lg">{t('header.subtitle')}</p>
+                <p className="text-[var(--text-secondary)] mt-2 text-lg">{t('header.subtitle')}</p>
             </header>
             <main className="w-full max-w-lg">
                 <BookingForm 
@@ -314,10 +324,10 @@ const App: React.FC = () => {
             return (
                 <div className="w-full max-w-4xl mx-auto">
                     <header className="text-center mb-8">
-                        <h1 className="text-4xl md:text-5xl font-bold text-amber-400 tracking-tight">
-                            <span className="text-white">Impostazioni</span> Ristorante
+                        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-accent)] tracking-tight">
+                            <span className="text-[var(--text-primary)]">Impostazioni</span> Ristorante
                         </h1>
-                        <p className="text-gray-400 mt-2 text-lg">Modifica le impostazioni e le disponibilità del tuo locale.</p>
+                        <p className="text-[var(--text-secondary)] mt-2 text-lg">Modifica le impostazioni e le disponibilità del tuo locale.</p>
                     </header>
                     <AdminSettings 
                         settings={settings}
@@ -332,14 +342,14 @@ const App: React.FC = () => {
             <div className="w-full max-w-7xl mx-auto">
                 <header className="flex justify-center items-center text-center mb-8 relative">
                     <div>
-                        <h1 className="text-4xl md:text-5xl font-bold text-amber-400 tracking-tight">
-                            <span className="text-white">Pannello</span> Ristorante
+                        <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-accent)] tracking-tight">
+                            <span className="text-[var(--text-primary)]">Pannello</span> Ristorante
                         </h1>
-                        <p className="text-gray-400 mt-2 text-lg">Gestisci le tue prenotazioni.</p>
+                        <p className="text-[var(--text-secondary)] mt-2 text-lg">Gestisci le tue prenotazioni.</p>
                     </div>
                     <button 
                         onClick={() => setAdminView('settings')}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 p-3 bg-gray-800 rounded-full border border-gray-700 text-gray-400 hover:text-amber-400 hover:border-amber-500 transition-all"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 p-3 bg-[var(--background-secondary)] rounded-full border border-[var(--border-primary)] text-[var(--text-secondary)] hover:text-[var(--text-accent)] hover:border-[var(--border-secondary)] transition-all"
                         aria-label="Vai alle impostazioni"
                     >
                         <Icon name="cog" className="w-6 h-6"/>
@@ -356,20 +366,23 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 flex flex-col items-center p-4 font-sans antialiased">
-            <nav className="w-full max-w-7xl mx-auto p-4 mb-4 bg-gray-800/50 rounded-xl border border-gray-700">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                       <Icon name="logo" className="w-8 h-8 text-amber-400" />
-                       <span className="text-xl font-bold text-white">The Golden Spoon</span>
+        <div className="min-h-screen bg-[var(--background-primary)] flex flex-col items-center p-4 font-sans antialiased">
+            <nav className="w-full max-w-7xl mx-auto p-4 mb-4 bg-[var(--background-secondary)]/80 rounded-xl border border-[var(--border-primary)]">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    {/* Logo and Name */}
+                    <div className="flex items-center justify-center gap-3">
+                       <Icon name="logo" className="w-8 h-8 text-[var(--text-accent)]" />
+                       <span className="text-xl font-bold text-[var(--text-primary)]">The Golden Spoon</span>
                     </div>
-                    <div className="flex items-center gap-4">
+                    
+                    {/* Actions container */}
+                    <div className="flex items-center justify-between md:justify-end md:gap-4">
                         <LanguageSwitcher currentLang={language} onLanguageChange={setLanguage} />
-                        <div className="flex items-center gap-2 bg-gray-700/80 p-1 rounded-lg">
-                            <button onClick={() => handleViewChange('customer')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'customer' ? 'bg-amber-500 text-gray-900' : 'text-gray-300 hover:bg-gray-600'}`}>
+                        <div className="flex items-center gap-2 bg-[var(--background-tertiary)] p-1 rounded-lg">
+                            <button onClick={() => handleViewChange('customer')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'customer' ? 'bg-[var(--accent-primary)] text-[var(--accent-text)]' : 'text-[var(--text-secondary)] hover:bg-[var(--background-interactive)]'}`}>
                                 {t('nav.book')}
                             </button>
-                            <button onClick={() => handleViewChange('admin')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'admin' ? 'bg-amber-500 text-gray-900' : 'text-gray-300 hover:bg-gray-600'}`}>
+                            <button onClick={() => handleViewChange('admin')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'admin' ? 'bg-[var(--accent-primary)] text-[var(--accent-text)]' : 'text-[var(--text-secondary)] hover:bg-[var(--background-interactive)]'}`}>
                                 Admin
                             </button>
                         </div>
@@ -400,7 +413,7 @@ const App: React.FC = () => {
 
             {isLoading && (
               <div className="fixed inset-0 bg-black bg-opacity-70 flex flex-col items-center justify-center z-50">
-                  <div className="w-16 h-16 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                  <div className="w-16 h-16 border-4 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin"></div>
                   <p className="text-white mt-4 text-lg">{step === AppStep.CONFIRMING ? t('loader.booking') : 'Conferma in corso...'}</p>
               </div>
             )}

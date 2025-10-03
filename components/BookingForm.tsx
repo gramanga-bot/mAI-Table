@@ -1,4 +1,3 @@
-
 import React, { useState, FormEvent, useEffect, useRef, useCallback } from 'react';
 import { BookingDetails, NotificationPlatform, DayOfWeek, VoiceBookingState, WeeklySchedule, Plan } from '../types';
 import { MAX_ADULTS, MAX_CHILDREN } from '../constants';
@@ -6,6 +5,7 @@ import Icon from './Icon';
 import NumberInput from './NumberInput';
 import TimeSlotPicker from './TimeSlotPicker';
 import VoiceBookingOverlay from './VoiceBookingOverlay';
+import PhoneInput from './PhoneInput';
 import { GoogleGenAI, Modality, LiveServerMessage } from '@google/genai';
 import { 
     updateBookingDetailsFunctionDeclaration, 
@@ -43,7 +43,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
     weeklySchedule, getAvailableSlotsForDate, activePlan
 }) => {
     const [name, setName] = useState(initialDetails?.name || '');
-    const [contact, setContact] = useState(initialDetails?.contact || '');
+    const [email, setEmail] = useState(initialDetails?.email || '');
+    const [phone, setPhone] = useState(initialDetails?.phone || '');
     const [date, setDate] = useState(initialDetails?.date || new Date().toISOString().split('T')[0]);
     const [time, setTime] = useState(initialDetails?.time || '');
     const [adults, setAdults] = useState(initialDetails?.adults || 2);
@@ -123,8 +124,17 @@ const BookingForm: React.FC<BookingFormProps> = ({
             return;
         }
 
-        if (!name.trim() || !contact.trim()) {
-            setFormError(t('error.nameContact'));
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!name.trim()) {
+            setFormError(t('error.name'));
+            return;
+        }
+         if (!email.trim() || !emailRegex.test(email)) {
+            setFormError(t('error.email'));
+            return;
+        }
+        if (!phone.trim() || phone.length < 8) { // Basic phone validation
+            setFormError(t('error.phone'));
             return;
         }
         if (!time) {
@@ -140,7 +150,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
             return;
         }
         setFormError('');
-        onBook({ name, contact, date, time, adults, children, platforms: Array.from(platforms) });
+        onBook({ name, email, phone, date, time, adults, children, platforms: Array.from(platforms) });
     };
 
     const cleanupVoiceSession = useCallback(() => {
@@ -232,7 +242,8 @@ const BookingForm: React.FC<BookingFormProps> = ({
                                     if (args.time) setTime(args.time as string);
                                     if (args.adults !== undefined) setAdults(args.adults as number);
                                     if (args.children !== undefined) setChildren(args.children as number);
-                                    if (args.contact) setContact(args.contact as string);
+                                    if (args.email) setEmail(args.email as string);
+                                    if (args.phone) setPhone(args.phone as string);
                                     if (args.platforms) {
                                         // FIX: Ensure platforms from the model is an array before creating a Set.
                                         // The model might return a single string, and this also makes the code more type-safe,
@@ -312,18 +323,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
 3.  **DATE**: Ask for the desired date. You MUST convert it to YYYY-MM-DD format. After updating, you will receive the available slots for that day in the tool response. Use them for the next step.
 4.  **TIME**: Ask for the time. Inform the user of the available slots for the date they chose. (e.g., "Per quella data, gli orari disponibili sono: [slots]. Quale preferisce?").
 5.  **NAME**: Ask for the reservation name. **CRITICAL**: After hearing the name, repeat it back for confirmation. (e.g., "La prenotazione sarà a nome Mario Rossi. È corretto?"). Do not proceed until confirmed.
-6.  **CONTACT PREFERENCE**: Ask which platform they prefer for confirmation: WhatsApp, Telegram, or Email. (e.g., "Su quale piattaforma preferisce ricevere la conferma: WhatsApp, Telegram o Email?"). Use the 'updateBookingDetails' tool to set the 'platforms' field with their single choice.
-7.  **CONTACT DETAIL**: This is the most critical step. Be extremely precise.
-    *   If they chose **WhatsApp** or **Telegram**: Ask for their phone number. (e.g., "Qual è il suo numero di telefono?"). **CRITICAL**: After hearing the number, repeat it back digit by digit for confirmation. (e.g., "Ho capito, il numero è 3 2 8 1 2 3 4 5 6 7. È esatto?"). Do not proceed until confirmed. The contact field must contain only digits.
-    *   If they chose **Email**: Ask for their email address. Instruct them to spell it out if necessary. (e.g., "Qual è il suo indirizzo email? Può scandirlo se è complesso."). **CRITICAL**: After hearing the email, repeat it back for confirmation. (e.g., "La sua email è mario.rossi@example.com. Corretto?"). Be prepared for formats like 'mario punto rossi chiocciola example punto com'. Do not proceed until confirmed.
-8.  **SUMMARY**: Once all details are confirmed, provide a full summary. (e.g., "Riepiloghiamo: una prenotazione per [Nome], per [numero] persone, il [data] alle [ora]. La contatteremo su [piattaforma] al [contatto]. Conferma?").
+6.  **EMAIL**: Ask for their email address. Instruct them to spell it out if necessary. (e.g., "Qual è il suo indirizzo email? Può scandirlo se è complesso."). **CRITICAL**: After hearing the email, repeat it back for confirmation. (e.g., "La sua email è mario.rossi@example.com. Corretto?"). Be prepared for formats like 'mario punto rossi chiocciola example punto com'. Do not proceed until confirmed. Use the 'updateBookingDetails' tool.
+7.  **PHONE**: Ask for their phone number. Assume the user will provide a national number; you don't need to ask for a country code. (e.g., "Qual è il suo numero di telefono?"). **CRITICAL**: After hearing the number, repeat it back digit by digit for confirmation. (e.g., "Ho capito, il numero è 3 2 8 1 2 3 4 5 6 7. È esatto?"). Do not proceed until confirmed. Use the 'updateBookingDetails' tool to set the phone field.
+8.  **SUMMARY**: Once all details are confirmed, provide a full summary. (e.g., "Riepiloghiamo: una prenotazione per [Nome], per [numero] persone, il [data] alle [ora]. La sua email è [email] e il suo telefono è [telefono]. Conferma?").
 9.  **FINALIZE**: Upon final user confirmation, your ONLY action is to call the 'finalizeBooking' function. Do not say anything else.
 
 **General Rules**:
 - Speak clear, concise Italian.
 - Be patient. If you don't understand, ask the user to repeat.
 - Use the 'updateBookingDetails' tool incrementally to fill the form.
-- Accuracy is more important than speed. The confirmation steps for name and contact details are mandatory.
+- Accuracy is more important than speed. The confirmation steps for name, email and phone are mandatory.
 - The available time slots depend on the chosen date. You must get the date first. For today, the available slots are: ${currentSlots.join(', ')}.`,
                 },
             });
@@ -356,42 +365,48 @@ const BookingForm: React.FC<BookingFormProps> = ({
 
 
     return (
-        <div className="bg-gray-800 p-8 rounded-2xl shadow-2xl shadow-black/30 border border-gray-700 w-full transition-all duration-300">
+        <div className="bg-[var(--background-secondary)] p-8 rounded-2xl shadow-2xl shadow-black/30 border border-[var(--border-primary)] w-full transition-all duration-300">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Dettagli Prenotazione</h2>
+                <h2 className="text-2xl font-bold text-[var(--text-primary)]">Dettagli Prenotazione</h2>
                 {activePlan === Plan.PRO && (
                     <button
                         type="button"
                         onClick={handleVoiceBookingToggle}
-                        className={`p-3 rounded-full transition-all duration-300 transform hover:scale-110 ${isVoiceBookingActive ? 'bg-red-500/80 hover:bg-red-600 animate-pulse' : 'bg-amber-500 hover:bg-amber-400'}`}
+                        className={`p-3 rounded-full transition-all duration-300 transform hover:scale-110 ${isVoiceBookingActive ? 'bg-red-500/80 hover:bg-red-600 animate-pulse' : 'bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)]'}`}
                         aria-label={isVoiceBookingActive ? 'Termina prenotazione vocale' : 'Avvia prenotazione vocale'}
                     >
-                        <Icon name="microphone" className="w-6 h-6 text-gray-900" />
+                        <Icon name="microphone" className="w-6 h-6 text-[var(--accent-text)]" />
                     </button>
                 )}
             </div>
             <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
                 {formError && (
-                    <div className="bg-red-900/50 border border-red-700 text-red-300 p-3 rounded-lg text-center">
+                    <div className="bg-[var(--negative-background)] border border-[var(--negative)] text-[var(--negative-text)] p-3 rounded-lg text-center">
                         {formError}
                     </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                     <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-gray-400 mb-1">{t('form.name.label')}</label>
-                        <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-gray-900/50 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" />
+                        <label htmlFor="name" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">{t('form.name.label')}</label>
+                        <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} required className="w-full bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-3 focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)] outline-none transition" />
                     </div>
-                    <div>
-                        <label htmlFor="contact" className="block text-sm font-medium text-gray-400 mb-1">{t('form.contact.label')}</label>
-                        <input type="text" id="contact" value={contact} onChange={e => setContact(e.target.value)} required className="w-full bg-gray-900/50 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                         <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">{t('form.email.label')}</label>
+                            <input type="email" id="email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-3 focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)] outline-none transition" />
+                        </div>
+                        <div>
+                            <label htmlFor="phone" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">{t('form.phone.label')}</label>
+                            <PhoneInput value={phone} onChange={setPhone} />
+                        </div>
                     </div>
                 </div>
 
                 <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-gray-400 mb-1">{t('form.date.label')}</label>
-                    <input type="date" id="date" value={date} min={today} onChange={e => handleDateChange(e.target.value)} required className="w-full bg-gray-900/50 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-amber-500 focus:border-amber-500 outline-none transition" />
+                    <label htmlFor="date" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">{t('form.date.label')}</label>
+                    <input type="date" id="date" value={date} min={today} onChange={e => handleDateChange(e.target.value)} required className="w-full bg-[var(--input-background)] text-[var(--input-text)] placeholder:text-[var(--input-placeholder)] border border-[var(--border-secondary)] rounded-md p-3 focus:ring-2 focus:ring-[var(--accent-primary)] focus:border-[var(--accent-primary)] outline-none transition" />
                     {closingDaysLabels && (
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-[var(--text-secondary)]/80 mt-2">
                             Giorno/i di chiusura: {closingDaysLabels}.
                         </p>
                     )}
@@ -403,16 +418,16 @@ const BookingForm: React.FC<BookingFormProps> = ({
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">{t('form.time.label')}</label>
+                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">{t('form.time.label')}</label>
                     <TimeSlotPicker selectedTime={time} onSelectTime={setTime} timeSlots={availableTimeSlots} />
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-400 mb-2">{t('form.notification.label')}</label>
+                    <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">{t('form.notification.label')}</label>
                     <div className="grid grid-cols-3 gap-3">
                         {/* The explicit array provides better type safety than Object.values() for string enums. */}
                         {[NotificationPlatform.WHATSAPP, NotificationPlatform.TELEGRAM, NotificationPlatform.EMAIL].map(platform => (
-                            <button type="button" key={platform} onClick={() => handlePlatformChange(platform)} className={`flex items-center justify-center p-3 rounded-lg border-2 transition-all duration-200 ${platforms.has(platform) ? 'bg-amber-500/10 border-amber-500 text-amber-400' : 'bg-gray-700/50 border-gray-600 hover:border-gray-500'}`}>
+                            <button type="button" key={platform} onClick={() => handlePlatformChange(platform)} className={`flex items-center justify-center p-3 rounded-lg border-2 transition-all duration-200 ${platforms.has(platform) ? 'bg-[var(--accent-secondary)] border-[var(--accent-secondary-border)] text-[var(--text-accent)]' : 'bg-[var(--background-tertiary)]/50 border-[var(--border-secondary)] hover:border-[var(--border-secondary)]'}`}>
                                 <Icon name={platform.toLowerCase() as 'whatsapp' | 'telegram' | 'email'} className="w-5 h-5 mr-2" />
                                 <span className="font-semibold">{platform}</span>
                             </button>
@@ -420,7 +435,7 @@ const BookingForm: React.FC<BookingFormProps> = ({
                     </div>
                 </div>
 
-                <button type="submit" className="w-full bg-amber-500 text-gray-900 font-bold py-3 px-4 rounded-lg hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-amber-500 text-lg">
+                <button type="submit" className="w-full bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-3 px-4 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-secondary)] focus:ring-[var(--accent-primary)] text-lg">
                     {t('form.submit.button')}
                 </button>
             </form>

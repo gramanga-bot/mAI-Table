@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { AdminSettings as AdminSettingsType, DigitalMenu, MenuCategory, MenuItem, Allergen, DietaryProfile } from '../types';
 import Icon from './Icon';
@@ -445,73 +444,73 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
             )}
 
             <div className="flex justify-between items-center flex-wrap gap-4">
-                <h2 className="text-3xl font-bold text-white">Gestione Menù</h2>
+                <h2 className="text-3xl font-bold text-[var(--text-primary)]">Gestione Menù</h2>
                 <div className="flex items-center gap-3">
-                     <button onClick={() => addPhotoInputRef.current?.click()} disabled={isAddingFromPhoto} className="bg-gray-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait">
+                     <button onClick={() => addPhotoInputRef.current?.click()} disabled={isAddingFromPhoto} className="bg-[var(--background-tertiary)] text-[var(--text-primary)] font-bold py-2 px-6 rounded-lg hover:bg-[var(--background-interactive)] transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-wait">
                        <Icon name="camera" className="w-5 h-5" />
                        Aggiungi da Foto
                     </button>
-                    <button onClick={() => setIsAddFromTextModalOpen(true)} className="bg-gray-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
+                    <button onClick={() => setIsAddFromTextModalOpen(true)} className="bg-[var(--background-tertiary)] text-[var(--text-primary)] font-bold py-2 px-6 rounded-lg hover:bg-[var(--background-interactive)] transition-colors flex items-center gap-2">
                        <Icon name="sparkles" className="w-5 h-5" />
                        Aggiungi con IA
                     </button>
-                    <button onClick={() => setIsPreviewOpen(true)} className="bg-gray-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2">
+                    <button onClick={() => setIsPreviewOpen(true)} className="bg-[var(--background-tertiary)] text-[var(--text-primary)] font-bold py-2 px-6 rounded-lg hover:bg-[var(--background-interactive)] transition-colors flex items-center gap-2">
                        <Icon name="eye" className="w-5 h-5" />
                        Anteprima
                     </button>
-                    <button onClick={handleSaveChanges} className="bg-amber-500 text-gray-900 font-bold py-2 px-6 rounded-lg hover:bg-amber-400 transition-colors">
+                    <button onClick={handleSaveChanges} className="bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-2 px-6 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-colors">
                         Salva Modifiche
                     </button>
                 </div>
             </div>
-             {addPhotoError && <p className="text-red-400 text-sm mt-2 text-center">{addPhotoError}</p>}
+             {addPhotoError && <p className="text-[var(--negative-text)] text-sm mt-2 text-center">{addPhotoError}</p>}
             
             <div className="space-y-6">
                 {localMenu.categories.map((category, catIndex) => (
-                    <div key={category.id} className="bg-gray-800/70 p-4 rounded-xl border border-gray-700">
+                    <div key={category.id} className="bg-[var(--background-secondary)] p-4 rounded-xl border border-[var(--border-primary)]">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center gap-3 w-full">
                                 <div className="flex flex-col">
-                                    <button onClick={() => handleMoveCategory(catIndex, 'up')} disabled={catIndex === 0} className="p-1 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-up" className="w-5 h-5"/></button>
-                                    <button onClick={() => handleMoveCategory(catIndex, 'down')} disabled={catIndex === localMenu.categories.length - 1} className="p-1 text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-down" className="w-5 h-5"/></button>
+                                    <button onClick={() => handleMoveCategory(catIndex, 'up')} disabled={catIndex === 0} className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-up" className="w-5 h-5"/></button>
+                                    <button onClick={() => handleMoveCategory(catIndex, 'down')} disabled={catIndex === localMenu.categories.length - 1} className="p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-down" className="w-5 h-5"/></button>
                                 </div>
-                                <input type="text" value={category.name} onChange={(e) => handleCategoryNameChange(category.id, e.target.value)} className="text-2xl font-bold text-amber-400 bg-transparent w-full border-b-2 border-gray-700 focus:border-amber-500 outline-none pb-2 uppercase" />
-                                <Icon name="pencil" className="w-5 h-5 text-gray-500 ml-2" />
+                                <input type="text" value={category.name} onChange={(e) => handleCategoryNameChange(category.id, e.target.value)} className="text-2xl font-bold text-[var(--text-accent)] bg-transparent w-full border-b-2 border-[var(--border-primary)] focus:border-[var(--accent-primary)] outline-none pb-2 uppercase" />
+                                <Icon name="pencil" className="w-5 h-5 text-[var(--text-secondary)]/50 ml-2" />
                             </div>
-                            <button onClick={() => handleDeleteCategory(category.id)} className="ml-4 text-gray-500 hover:text-red-400 p-2 transition-colors flex-shrink-0"><Icon name="trash" className="w-6 h-6"/></button>
+                            <button onClick={() => handleDeleteCategory(category.id)} className="ml-4 text-[var(--text-secondary)] hover:text-[var(--negative)] p-2 transition-colors flex-shrink-0"><Icon name="trash" className="w-6 h-6"/></button>
                         </div>
 
                         <div className="space-y-3 pl-4">
                             {category.items.map((item, itemIndex) => (
-                                <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-gray-900/50 p-3 rounded-lg">
+                                <div key={item.id} className="grid grid-cols-12 gap-4 items-center bg-[var(--background-primary)] p-3 rounded-lg">
                                     <div className="col-span-1 flex flex-col items-center justify-center">
-                                        <button onClick={() => handleMoveItem(category.id, itemIndex, 'up')} disabled={itemIndex === 0} className="p-0.5 text-gray-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-up" className="w-4 h-4" /></button>
-                                        <button onClick={() => handleMoveItem(category.id, itemIndex, 'down')} disabled={itemIndex === category.items.length - 1} className="p-0.5 text-gray-500 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-down" className="w-4 h-4" /></button>
+                                        <button onClick={() => handleMoveItem(category.id, itemIndex, 'up')} disabled={itemIndex === 0} className="p-0.5 text-[var(--text-secondary)]/80 hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-up" className="w-4 h-4" /></button>
+                                        <button onClick={() => handleMoveItem(category.id, itemIndex, 'down')} disabled={itemIndex === category.items.length - 1} className="p-0.5 text-[var(--text-secondary)]/80 hover:text-[var(--text-primary)] disabled:opacity-30 disabled:cursor-not-allowed"><Icon name="chevron-down" className="w-4 h-4" /></button>
                                     </div>
                                     <div className="col-span-11 md:col-span-4">
-                                        <input type="text" value={item.name} onChange={e => handleItemChange(category.id, item.id, 'name', e.target.value)} className="w-full bg-gray-700/50 rounded p-2 font-bold text-white focus:ring-1 focus:ring-amber-500 outline-none capitalize"/>
+                                        <input type="text" value={item.name} onChange={e => handleItemChange(category.id, item.id, 'name', e.target.value)} className="w-full bg-[var(--background-tertiary)]/50 rounded p-2 font-bold text-[var(--text-primary)] border border-[var(--border-secondary)] focus:ring-2 focus:ring-[var(--accent-primary)] outline-none capitalize"/>
                                         <div className="flex items-center gap-2 mt-2">
                                             {item.dietaryProfiles.map(p => <TagIcon key={p} tag={p} />)}
                                             {item.allergens.map(a => <TagIcon key={a} tag={a} />)}
                                         </div>
                                     </div>
                                     <div className="col-span-12 md:col-span-5">
-                                        <input type="text" placeholder="Ingredienti..." value={item.ingredients} onChange={e => handleItemChange(category.id, item.id, 'ingredients', e.target.value)} className="w-full bg-gray-700/50 rounded p-2 text-sm text-gray-300 focus:ring-1 focus:ring-amber-500 outline-none"/>
+                                        <input type="text" placeholder="Ingredienti..." value={item.ingredients} onChange={e => handleItemChange(category.id, item.id, 'ingredients', e.target.value)} className="w-full bg-[var(--background-tertiary)]/50 rounded p-2 text-sm text-[var(--text-secondary)] border border-[var(--border-secondary)] focus:ring-2 focus:ring-[var(--accent-primary)] outline-none"/>
                                     </div>
                                     <div className="col-span-12 md:col-span-2 flex items-center justify-end gap-2">
-                                        <div className="relative"><input type="number" value={item.price || 0} onChange={e => handleItemChange(category.id, item.id, 'price', parseFloat(e.target.value) || 0)} className="w-20 bg-gray-700/50 rounded p-2 text-white pl-6 focus:ring-1 focus:ring-amber-500 outline-none"/><span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400">€</span></div>
-                                        <button onClick={() => setEditingTagsItem({ catId: category.id, item })} className="text-gray-400 hover:text-amber-400"><Icon name="pencil" className="w-5 h-5" /></button>
-                                        <button onClick={() => handleDeleteDish(category.id, item.id)} className="text-gray-500 hover:text-red-400"><Icon name="trash" className="w-5 h-5"/></button>
+                                        <div className="relative"><input type="number" value={item.price || 0} onChange={e => handleItemChange(category.id, item.id, 'price', parseFloat(e.target.value) || 0)} className="w-20 bg-[var(--background-tertiary)]/50 rounded p-2 text-[var(--text-primary)] pl-6 border border-[var(--border-secondary)] focus:ring-2 focus:ring-[var(--accent-primary)] outline-none"/><span className="absolute left-2 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">€</span></div>
+                                        <button onClick={() => setEditingTagsItem({ catId: category.id, item })} className="text-[var(--text-secondary)] hover:text-[var(--text-accent)]"><Icon name="pencil" className="w-5 h-5" /></button>
+                                        <button onClick={() => handleDeleteDish(category.id, item.id)} className="text-[var(--text-secondary)] hover:text-[var(--negative)]"><Icon name="trash" className="w-5 h-5"/></button>
                                     </div>
                                 </div>
                             ))}
                         </div>
-                        <div className="mt-4"><button onClick={() => handleAddDish(category.id)} className="w-full bg-gray-700/50 hover:bg-gray-700 text-amber-400 font-semibold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center gap-2 text-sm"><Icon name="plus" className="w-5 h-5" />Aggiungi Piatto</button></div>
+                        <div className="mt-4"><button onClick={() => handleAddDish(category.id)} className="w-full bg-[var(--background-tertiary)] hover:bg-[var(--background-interactive)] text-[var(--text-accent)] font-semibold py-2 px-3 rounded-md transition-colors duration-200 flex items-center justify-center gap-2 text-sm"><Icon name="plus" className="w-5 h-5" />Aggiungi Piatto</button></div>
                     </div>
                 ))}
             </div>
             
-            <div className="mt-8 pt-6 border-t border-gray-700 text-center"><button onClick={handleAddNewCategory} className="bg-gray-700 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2 mx-auto"><Icon name="plus" className="w-5 h-5" />Aggiungi Nuova Categoria</button></div>
+            <div className="mt-8 pt-6 border-t border-[var(--border-primary)] text-center"><button onClick={handleAddNewCategory} className="bg-[var(--background-tertiary)] text-[var(--text-primary)] font-bold py-2 px-6 rounded-lg hover:bg-[var(--background-interactive)] transition-colors flex items-center gap-2 mx-auto"><Icon name="plus" className="w-5 h-5" />Aggiungi Nuova Categoria</button></div>
         </div>
         
         <input type="file" ref={addPhotoInputRef} onChange={handleAddFromPhoto} accept="image/*" capture="environment" className="hidden" multiple />
@@ -520,14 +519,14 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
         
         {editingTagsItem && (
              <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-3xl">
+                <div className="bg-[var(--background-secondary)] rounded-2xl shadow-2xl border border-[var(--border-primary)] w-full max-w-3xl">
                     <div className="p-6">
-                        <h3 className="text-xl font-bold text-white mb-1">Modifica Dettagli: <span className="text-amber-400">{editingTagsItem.item.name}</span></h3>
-                        <p className="text-sm text-gray-400 mb-6">Perfeziona le etichette alimentari rilevate dall'IA.</p>
+                        <h3 className="text-xl font-bold text-[var(--text-primary)] mb-1">Modifica Dettagli: <span className="text-[var(--text-accent)]">{editingTagsItem.item.name}</span></h3>
+                        <p className="text-sm text-[var(--text-secondary)] mb-6">Perfeziona le etichette alimentari rilevate dall'IA.</p>
                         
                         <div className="space-y-4">
                             <div>
-                                <h4 className="font-semibold text-gray-200 mb-2">Profili Alimentari</h4>
+                                <h4 className="font-semibold text-[var(--text-secondary)] mb-2">Profili Alimentari</h4>
                                 <div className="grid grid-cols-3 gap-2">
                                     {Object.values(DietaryProfile).map(profile => {
                                         const isGlutenAllergenPresent = editingTagsItem.item.allergens.includes(Allergen.Gluten);
@@ -535,22 +534,22 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
                                         const isChecked = !isDisabled && editingTagsItem.item.dietaryProfiles.includes(profile);
 
                                         return (
-                                            <label key={profile} className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-colors ${isChecked ? 'bg-green-500/10 border-green-500' : 'bg-gray-900/50 border-gray-700'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-600'}`}>
+                                            <label key={profile} className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-colors ${isChecked ? 'bg-green-500/10 border-green-500' : 'bg-[var(--background-primary)] border-[var(--border-primary)]'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[var(--border-secondary)]'}`}>
                                                 <input
                                                     type="checkbox"
                                                     disabled={isDisabled}
                                                     checked={isChecked}
                                                     onChange={() => handleTagModalChange('profile', profile)}
-                                                    className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-600"
+                                                    className="custom-checkbox h-4 w-4 rounded focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-secondary)] focus:ring-[var(--accent-primary)]"
                                                 />
-                                                <span className="text-sm font-medium text-gray-300">{profile}</span>
+                                                <span className="text-sm font-medium text-[var(--text-secondary)]">{profile}</span>
                                             </label>
                                         );
                                     })}
                                 </div>
                             </div>
                              <div>
-                                <h4 className="font-semibold text-gray-200 mb-2">Allergeni</h4>
+                                <h4 className="font-semibold text-[var(--text-secondary)] mb-2">Allergeni</h4>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                                      {Object.values(Allergen).map(allergen => {
                                         const isGlutenFreeProfilePresent = editingTagsItem.item.dietaryProfiles.includes(DietaryProfile.GlutenFree);
@@ -558,15 +557,15 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
                                         const isChecked = !isDisabled && editingTagsItem.item.allergens.includes(allergen);
 
                                         return (
-                                            <label key={allergen} className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-colors ${isChecked ? 'bg-red-500/10 border-red-500' : 'bg-gray-900/50 border-gray-700'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-gray-600'}`}>
+                                            <label key={allergen} className={`flex items-center gap-2 p-2 rounded-lg border-2 transition-colors ${isChecked ? 'bg-red-500/10 border-red-500' : 'bg-[var(--background-primary)] border-[var(--border-primary)]'} ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-[var(--border-secondary)]'}`}>
                                                 <input
                                                     type="checkbox"
                                                     disabled={isDisabled}
                                                     checked={isChecked}
                                                     onChange={() => handleTagModalChange('allergen', allergen)}
-                                                    className="h-4 w-4 rounded bg-gray-700 border-gray-600 text-amber-500 focus:ring-amber-600"
+                                                    className="custom-checkbox h-4 w-4 rounded focus:ring-2 focus:ring-offset-2 focus:ring-offset-[var(--background-secondary)] focus:ring-[var(--accent-primary)]"
                                                 />
-                                                <span className="text-sm font-medium text-gray-300">{allergen}</span>
+                                                <span className="text-sm font-medium text-[var(--text-secondary)]">{allergen}</span>
                                             </label>
                                         );
                                     })}
@@ -574,9 +573,9 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
                             </div>
                         </div>
                     </div>
-                    <div className="bg-gray-800/50 p-4 border-t border-gray-700 flex justify-end gap-3">
-                        <button onClick={() => setEditingTagsItem(null)} className="bg-gray-700 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition-colors">Annulla</button>
-                        <button onClick={() => handleItemTagsChange(editingTagsItem.catId, editingTagsItem.item.id, editingTagsItem.item.allergens, editingTagsItem.item.dietaryProfiles)} className="bg-amber-500 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-400 transition-colors">Salva Dettagli</button>
+                    <div className="bg-[var(--background-secondary)]/50 p-4 border-t border-[var(--border-primary)] flex justify-end gap-3">
+                        <button onClick={() => setEditingTagsItem(null)} className="bg-[var(--background-tertiary)] text-[var(--text-primary)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--background-interactive)] transition-colors">Annulla</button>
+                        <button onClick={() => handleItemTagsChange(editingTagsItem.catId, editingTagsItem.item.id, editingTagsItem.item.allergens, editingTagsItem.item.dietaryProfiles)} className="bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-colors">Salva Dettagli</button>
                     </div>
                 </div>
             </div>
@@ -584,12 +583,12 @@ const MenuManager: React.FC<MenuManagerProps> = ({ settings, onUpdateSettings })
         
         {isAddFromTextModalOpen && (
             <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-2xl"><div className="p-6"><div className="flex justify-between items-center mb-4"><h3 className="text-xl font-bold text-white">Aggiungi Piatti al Menù con IA</h3><button onClick={() => setIsAddFromTextModalOpen(false)} className="text-gray-400 hover:text-white"><Icon name="x-circle" className="w-6 h-6" /></button></div><p className="text-gray-400 mb-4 text-sm">Incolla qui il testo di un'altra sezione del tuo menù (es. Primi Piatti). L'IA la analizzerà e la aggiungerà a quello esistente.</p><textarea value={addMenuText} onChange={e => setAddMenuText(e.target.value)} placeholder="Es: PRIMI PIATTI - Carbonara 12€ - Amatriciana 11€..." className="w-full h-40 bg-gray-900 border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-amber-500 outline-none transition" aria-label="Incolla qui il testo da aggiungere"/>{addError && <p className="text-red-400 text-sm mt-2">{addError}</p>}{isAddingWithAI && (<div className="mt-4 space-y-2"><div className="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600"><div className="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-300 ease-linear" style={{ width: `${progress}%` }}></div><span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference px-2">{`Analisi in corso... ${Math.floor(progress)}%`}</span></div></div>)}</div><div className="bg-gray-800/50 p-4 border-t border-gray-700 flex justify-end"><button onClick={handleAddToMenu} disabled={isAddingWithAI} className="w-full flex items-center justify-center gap-2 bg-amber-500 text-gray-900 font-bold py-2 px-4 rounded-lg hover:bg-amber-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed">{isAddingWithAI ? 'Aggiungendo...' : (<><Icon name="sparkles" className="w-5 h-5" />Aggiungi al Menù</>)}</button></div></div>
+                <div className="bg-[var(--background-secondary)] rounded-2xl shadow-2xl border border-[var(--border-primary)] w-full max-w-2xl"><div className="p-6"><div className="flex justify-between items-center mb-4"><h3 className="text-xl font-bold text-[var(--text-primary)]">Aggiungi Piatti al Menù con IA</h3><button onClick={() => setIsAddFromTextModalOpen(false)} className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"><Icon name="x-circle" className="w-6 h-6" /></button></div><p className="text-[var(--text-secondary)] mb-4 text-sm">Incolla qui il testo di un'altra sezione del tuo menù (es. Primi Piatti). L'IA la analizzerà e la aggiungerà a quello esistente.</p><textarea value={addMenuText} onChange={e => setAddMenuText(e.target.value)} placeholder="Es: PRIMI PIATTI - Carbonara 12€ - Amatriciana 11€..." className="w-full h-40 bg-[var(--background-primary)] border border-[var(--border-secondary)] rounded-md p-3 focus:ring-2 focus:ring-[var(--accent-primary)] outline-none transition" aria-label="Incolla qui il testo da aggiungere"/>{addError && <p className="text-[var(--negative-text)] text-sm mt-2">{addError}</p>}{isAddingWithAI && (<div className="mt-4 space-y-2"><div className="w-full bg-[var(--background-tertiary)] rounded-full h-4 relative overflow-hidden border border-[var(--border-secondary)]"><div className="bg-gradient-to-r from-[var(--text-accent)] to-[var(--accent-primary)] h-full rounded-full transition-all duration-300 ease-linear" style={{ width: `${progress}%` }}></div><span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference px-2">{`Analisi in corso... ${Math.floor(progress)}%`}</span></div></div>)}</div><div className="bg-[var(--background-secondary)]/50 p-4 border-t border-[var(--border-primary)] flex justify-end"><button onClick={handleAddToMenu} disabled={isAddingWithAI} className="w-full flex items-center justify-center gap-2 bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-all disabled:opacity-50 disabled:cursor-not-allowed">{isAddingWithAI ? 'Aggiungendo...' : (<><Icon name="sparkles" className="w-5 h-5" />Aggiungi al Menù</>)}</button></div></div>
             </div>
         )}
 
         {isAddingFromPhoto && (
-            <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 p-4 backdrop-blur-sm"><Icon name="camera" className="w-16 h-16 text-amber-400 mx-auto mb-4 animate-pulse" /><h2 className="text-3xl font-bold text-white mb-4">Un attimo di pazienza...</h2><div className="w-full max-w-md space-y-2"><div className="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600"><div className="bg-gradient-to-r from-amber-400 to-amber-500 h-full rounded-full transition-all duration-300 ease-linear" style={{ width: `${addPhotoProgress}%` }}></div><span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference px-2">{`${addPhotoProgressMessage} ${Math.floor(addPhotoProgress)}%`}</span></div></div>{addPhotoError && <p className="text-red-400 text-sm mt-4">{addPhotoError}</p>}</div>
+            <div className="fixed inset-0 bg-black/80 flex flex-col items-center justify-center z-50 p-4 backdrop-blur-sm"><Icon name="camera" className="w-16 h-16 text-[var(--text-accent)] mx-auto mb-4 animate-pulse" /><h2 className="text-3xl font-bold text-white mb-4">Un attimo di pazienza...</h2><div className="w-full max-w-md space-y-2"><div className="w-full bg-[var(--background-tertiary)] rounded-full h-4 relative overflow-hidden border border-[var(--border-secondary)]"><div className="bg-gradient-to-r from-[var(--text-accent)] to-[var(--accent-primary)] h-full rounded-full transition-all duration-300 ease-linear" style={{ width: `${addPhotoProgress}%` }}></div><span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white mix-blend-difference px-2">{`${addPhotoProgressMessage} ${Math.floor(addPhotoProgress)}%`}</span></div></div>{addPhotoError && <p className="text-[var(--negative-text)] text-sm mt-4">{addPhotoError}</p>}</div>
         )}
         </>
     );
