@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
-    name: 'whatsapp' | 'telegram' | 'email' | 'copy' | 'check' | 'users' | 'calendar' | 'clock' | 'check-circle' | 'x-circle' | 'dots-horizontal' | 'logo' | 'bell' | 'plus' | 'minus' | 'cog' | 'microphone' | 'book-open' | 'camera' | 'sparkles' | 'trash' | 'link' | 'eye' | 'pencil' | 'grip-vertical';
+    name: 'whatsapp' | 'telegram' | 'email' | 'copy' | 'check' | 'users' | 'calendar' | 'clock' | 'check-circle' | 'x-circle' | 'dots-horizontal' | 'logo' | 'bell' | 'plus' | 'minus' | 'cog' | 'microphone' | 'book-open' | 'camera' | 'sparkles' | 'trash' | 'link' | 'eye' | 'pencil' | 'grip-vertical' | 'chevron-up' | 'chevron-down';
 }
 
 const Icon: React.FC<IconProps> = ({ name, ...props }) => {
@@ -133,6 +133,16 @@ const Icon: React.FC<IconProps> = ({ name, ...props }) => {
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75l.483.484a2.25 2.25 0 003.182 0l.483-.484M12 12.75v.007M12 12.75v.007m0-3.004l.483.483a2.25 2.25 0 003.182 0l.483-.483m-3.646 0v.007m0-3.004l.483.483a2.25 2.25 0 003.182 0l.483-.483M12 9.75v.007M9 9.75l.483.484a2.25 2.25 0 003.182 0l.483-.484m-3.646-3.004v.006m0 0l.483.483a2.25 2.25 0 003.182 0l.483-.483" />
                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75v.007M15 6.75v.007M15 9.75v.007M15 12.75v.007M15 15.75v.007M12 15.75v.007M9 15.75v.007M9 12.75v.007M9 9.75v.007M12 9.75v.007M9 6.75v.007m3 0v.007" />
+            </svg>
+        ),
+        'chevron-up': (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" {...props}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+            </svg>
+        ),
+        'chevron-down': (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" {...props}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
             </svg>
         )
     };

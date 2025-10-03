@@ -165,7 +165,7 @@ ${menuText}
             model: "gemini-2.5-flash",
             contents: prompt,
             config: {
-                systemInstruction: "You are an expert data extraction and formatting AI. Your task is to accurately parse raw text from a restaurant menu and convert it into a structured JSON object according to the provided schema. You must strictly adhere to the following formatting rules: 1. Category Names: The `name` field for each category object must be converted to ALL UPPERCASE (e.g., 'ANTIPASTI', 'LE CARNI'). 2. Dish Names: The `name` field for each dish inside the `items` array must be converted to Title Case, where the first letter of each important word is capitalized (e.g., 'Spaghetti alla Carbonara', 'Filetto di Manzo alla Rossini'). Be precise with all other data like prices and descriptions.",
+                systemInstruction: "You are an expert data extraction and formatting AI. Your task is to accurately parse raw text from a restaurant menu and convert it into a structured JSON object according to the provided schema. You must strictly adhere to the following formatting rules: 1. Category Names: The `name` field for each category object must be converted to ALL UPPERCASE (e.g., 'ANTIPASTI', 'LE CARNI'). 2. Dish Names: The `name` field for each dish inside the `items` array must be converted to Title Case, where the first letter of each important word is capitalized (e.g., 'Spaghetti alla Carbonara', 'Filetto di Manzo alla Rossini'). 3. Category Sorting: You MUST sort the categories in the final JSON array according to a logical Italian menu structure (e.g., ANTIPASTI, PRIMI, SECONDI, PIZZE, CONTORNI, DESSERT/DOLCI, BEVANDE). Place any other categories at the end. Be precise with all other data like prices and descriptions.",
                 responseMimeType: "application/json",
                 responseSchema: menuSchema,
             },
@@ -178,6 +178,46 @@ ${menuText}
     } catch (error) {
         console.error("Gemini API call for menu generation failed:", error);
         throw new Error("Failed to generate menu from text.");
+    }
+};
+
+export const generateMenuFromImage = async (images: {data: string, mimeType: string}[]): Promise<Omit<MenuCategory, 'id'>[]> => {
+    const prompt = `
+Parse the restaurant menu in the provided images (which could be multiple pages of the same menu) and structure it into a single, unified JSON format.
+Identify categories, and for each category, list the dishes with their name, price, and description.
+If a description is not available, provide an empty string. Prices should be numbers.
+Combine dishes from the same category found across different images into a single category list in the final output.
+`;
+
+    const imageParts = images.map(img => ({
+        inlineData: {
+            mimeType: img.mimeType,
+            data: img.data,
+        },
+    }));
+
+    const textPart = {
+        text: prompt,
+    };
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: { parts: [textPart, ...imageParts] },
+            config: {
+                systemInstruction: "You are an expert data extraction and formatting AI. Your task is to accurately parse raw text from a restaurant menu and convert it into a structured JSON object according to the provided schema. You must strictly adhere to the following formatting rules: 1. Category Names: The `name` field for each category object must be converted to ALL UPPERCASE (e.g., 'ANTIPASTI', 'LE CARNI'). 2. Dish Names: The `name` field for each dish inside the `items` array must be converted to Title Case, where the first letter of each important word is capitalized (e.g., 'Spaghetti alla Carbonara', 'Filetto di Manzo alla Rossini'). 3. Category Sorting: You MUST sort the categories in the final JSON array according to a logical Italian menu structure (e.g., ANTIPASTI, PRIMI, SECONDI, PIZZE, CONTORNI, DESSERT/DOLCI, BEVANDE). Place any other categories at the end. Be precise with all other data like prices and descriptions.",
+                responseMimeType: "application/json",
+                responseSchema: menuSchema,
+            },
+        });
+        
+        const jsonStr = response.text.trim();
+        const parsedResponse = JSON.parse(jsonStr);
+        return parsedResponse as Omit<MenuCategory, 'id'>[];
+
+    } catch (error) {
+        console.error("Gemini API call for menu generation from image failed:", error);
+        throw new Error("Failed to generate menu from image.");
     }
 };
 
