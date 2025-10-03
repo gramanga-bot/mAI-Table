@@ -92,6 +92,30 @@ export interface ServiceWindow {
 
 export type WeeklySchedule = Record<DayOfWeek, string[]>; // Maps DayOfWeek to an array of ServiceWindow IDs
 
+// Digital Menu Types
+export interface MenuItem {
+    id: string;
+    name: string;
+    description: string;
+    price?: number;
+    ingredients: string; // comma-separated for simplicity
+    isAvailable: boolean;
+}
+
+export interface MenuCategory {
+    id: string;
+    name: string;
+    items: MenuItem[];
+}
+
+export interface DishOfTheDay extends MenuItem {}
+
+export interface DigitalMenu {
+    categories: MenuCategory[];
+    dishesOfTheDay: DishOfTheDay[];
+    showPrices: boolean;
+}
+
 // Unified AdminSettings interface for both plans
 export interface AdminSettings {
     activePlan: Plan;
@@ -100,6 +124,9 @@ export interface AdminSettings {
     serviceWindows: ServiceWindow[];
     weeklySchedule: WeeklySchedule;
     
+    // Digital Menu Settings
+    digitalMenu: DigitalMenu | null;
+
     // PRO Plan Specific Settings
     tables: Table[];
     combinationRules: TableCombinationRule[];

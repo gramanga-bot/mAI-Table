@@ -2,6 +2,6 @@
   "name": "AI Restaurant Booker",
   "description": "An intelligent restaurant table booking application that uses AI to generate personalized confirmation and reminder messages for various communication platforms like WhatsApp, Telegram, and email.",
   "requestFramePermissions": [
-    "microphone"
+    "camera"
   ]
 }

@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType } from './types';
 import BookingForm from './components/BookingForm';
@@ -137,6 +136,8 @@ const App: React.FC = () => {
             [DayOfWeek.WEDNESDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.THURSDAY]: ['sw-lunch', 'sw-dinner'],
             [DayOfWeek.FRIDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.SATURDAY]: ['sw-lunch', 'sw-dinner'],
         },
+        // Digital Menu
+        digitalMenu: null,
         // PRO settings
         tables: Array.from({ length: 10 }, (_, i) => ({
             id: `t4-${i + 1}`, name: `Tavolo ${i + 1}`, capacity: 4, isCombinable: true,
@@ -189,7 +190,7 @@ const App: React.FC = () => {
         }
 
         if (!isAvailable) {
-            setError(settings.activePlan === Plan.PRO
+            setError(settings.activeplan === Plan.PRO
                 ? "Siamo spiacenti, non ci sono tavoli disponibili per la data, l'orario e la durata richiesti. Prova a modificare la richiesta."
                 : "Siamo spiacenti, la fascia oraria richiesta è al completo. Prova un altro orario."
             );
@@ -347,6 +348,8 @@ const App: React.FC = () => {
                 <AdminDashboard 
                     bookings={bookings} 
                     onUpdateStatus={handleUpdateBookingStatus}
+                    settings={settings}
+                    onUpdateSettings={handleSettingsUpdate}
                 />
             </div>
         );

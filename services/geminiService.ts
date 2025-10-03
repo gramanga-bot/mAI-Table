@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
-import { BookingDetails, ConfirmationMessages } from '../types';
+import { BookingDetails, ConfirmationMessages, MenuCategory } from '../types';
 
 if (!process.env.API_KEY) {
     throw new Error("API_KEY environment variable not set");
@@ -110,6 +110,74 @@ For the email, include a concluding sentence like "We look forward to welcoming 
     } catch (error) {
         console.error("Gemini API call for confirmation failed:", error);
         throw new Error("Failed to generate final confirmation messages from AI.");
+    }
+};
+
+const menuSchema = {
+    type: Type.ARRAY,
+    items: {
+      type: Type.OBJECT,
+      properties: {
+        name: {
+          type: Type.STRING,
+          description: 'The name of the menu category (e.g., "Antipasti", "Pizze Rosse").',
+        },
+        items: {
+          type: Type.ARRAY,
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              name: {
+                type: Type.STRING,
+                description: 'The name of the dish.',
+              },
+              description: {
+                type: Type.STRING,
+                description: 'A brief description of the dish. If ingredients are listed, include them here. If no description is provided, leave it as an empty string.',
+              },
+              price: {
+                type: Type.NUMBER,
+                description: 'The price of the dish as a number, extracting it even if it contains symbols like € or commas.',
+              },
+            },
+            required: ['name', 'description'],
+          },
+        },
+      },
+      required: ['name', 'items'],
+    },
+};
+
+export const generateMenuFromText = async (menuText: string): Promise<Omit<MenuCategory, 'id'>[]> => {
+    const prompt = `
+Parse the following restaurant menu text and structure it into a JSON format.
+Identify categories, and for each category, list the dishes with their name, price, and description.
+If a description is not available, provide an empty string. Prices should be numbers.
+
+Menu Text:
+---
+${menuText}
+---
+`;
+
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                systemInstruction: "You are an expert data extraction and formatting AI. Your task is to accurately parse raw text from a restaurant menu and convert it into a structured JSON object according to the provided schema. You must strictly adhere to the following formatting rules: 1. Category Names: The `name` field for each category object must be converted to ALL UPPERCASE (e.g., 'ANTIPASTI', 'LE CARNI'). 2. Dish Names: The `name` field for each dish inside the `items` array must be converted to Title Case, where the first letter of each important word is capitalized (e.g., 'Spaghetti alla Carbonara', 'Filetto di Manzo alla Rossini'). Be precise with all other data like prices and descriptions.",
+                responseMimeType: "application/json",
+                responseSchema: menuSchema,
+            },
+        });
+        
+        const jsonStr = response.text.trim();
+        const parsedResponse = JSON.parse(jsonStr);
+        return parsedResponse as Omit<MenuCategory, 'id'>[];
+
+    } catch (error) {
+        console.error("Gemini API call for menu generation failed:", error);
+        throw new Error("Failed to generate menu from text.");
     }
 };
 

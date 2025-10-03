@@ -1,32 +1,34 @@
-
 import React from 'react';
+import Icon from './Icon';
 
-type AdminTab = 'pending' | 'calendar';
+type AdminTab = 'pending' | 'calendar' | 'menu';
 
 interface AdminTabsProps {
     activeTab: AdminTab;
     onTabChange: (tab: AdminTab) => void;
 }
 
+const tabs: { id: AdminTab, label: string, icon: React.ComponentProps<typeof Icon>['name']}[] = [
+    { id: 'pending', label: 'Richieste', icon: 'bell' },
+    { id: 'calendar', label: 'Calendario', icon: 'calendar' },
+    { id: 'menu', label: 'Menù Digitale', icon: 'book-open' }
+]
+
 const AdminTabs: React.FC<AdminTabsProps> = ({ activeTab, onTabChange }) => {
     return (
-        <div className="flex items-center gap-2 bg-gray-800/80 p-1 rounded-xl border border-gray-700 max-w-md mx-auto">
-            <button
-                onClick={() => onTabChange('pending')}
-                className={`w-full px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                    activeTab === 'pending' ? 'bg-amber-500 text-gray-900' : 'text-gray-300 hover:bg-gray-700'
-                }`}
-            >
-                Richieste in Attesa
-            </button>
-            <button
-                onClick={() => onTabChange('calendar')}
-                className={`w-full px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
-                    activeTab === 'calendar' ? 'bg-amber-500 text-gray-900' : 'text-gray-300 hover:bg-gray-700'
-                }`}
-            >
-                Calendario
-            </button>
+        <div className="flex items-center gap-2 bg-gray-800/80 p-1 rounded-xl border border-gray-700 max-w-lg mx-auto">
+            {tabs.map(tab => (
+                 <button
+                    key={tab.id}
+                    onClick={() => onTabChange(tab.id)}
+                    className={`w-full px-4 py-2 text-sm font-semibold rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                        activeTab === tab.id ? 'bg-amber-500 text-gray-900' : 'text-gray-300 hover:bg-gray-700'
+                    }`}
+                >
+                    <Icon name={tab.icon} className="w-5 h-5" />
+                    {tab.label}
+                </button>
+            ))}
         </div>
     );
 };
