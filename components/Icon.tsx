@@ -5,7 +5,7 @@ type AllergenIconName = 'gluten' | 'crustaceans' | 'eggs' | 'fish' | 'peanuts' |
 type DietaryIconName = 'vegetarian' | 'vegan' | 'gluten-free';
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
-    name: 'whatsapp' | 'telegram' | 'email' | 'copy' | 'check' | 'users' | 'calendar' | 'clock' | 'check-circle' | 'x-circle' | 'dots-horizontal' | 'logo' | 'bell' | 'plus' | 'minus' | 'cog' | 'microphone' | 'book-open' | 'camera' | 'sparkles' | 'trash' | 'link' | 'eye' | 'pencil' | 'grip-vertical' | 'chevron-up' | 'chevron-down' | 'info-circle' | 'refresh' | 'filter' | 'file-text' | AllergenIconName | DietaryIconName;
+    name: 'whatsapp' | 'telegram' | 'email' | 'copy' | 'check' | 'users' | 'calendar' | 'clock' | 'check-circle' | 'x-circle' | 'dots-horizontal' | 'logo' | 'bell' | 'plus' | 'minus' | 'cog' | 'microphone' | 'book-open' | 'camera' | 'sparkles' | 'trash' | 'link' | 'eye' | 'pencil' | 'grip-vertical' | 'chevron-up' | 'chevron-down' | 'info-circle' | 'refresh' | 'filter' | 'file-text' | 'lock' | AllergenIconName | DietaryIconName;
 }
 
 const Icon: React.FC<IconProps> = ({ name, ...props }) => {
@@ -42,6 +42,7 @@ const Icon: React.FC<IconProps> = ({ name, ...props }) => {
         'refresh': (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.664 0l3.18-3.185m-3.18-3.182a8.25 8.25 0 00-11.664 0l-3.18 3.185" /></svg>),
         'filter': (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" /></svg>),
         'file-text': (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>),
+        'lock': (<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 00-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>),
 
         // --- New Dietary & Allergen Icons ---
         'gluten': (<svg fill="currentColor" viewBox="0 0 20 20" {...props}><path d="M10.933 3.153a1 1 0 00-1.866 0l-5 12.5A1 1 0 005 17h10a1 1 0 00.933-1.347l-5-12.5zM10 6.12L12.382 12H7.618L10 6.12zM6 15l-1.42-3.55A3.003 3.003 0 017.34 8.04L10 2l2.66 6.04a3.003 3.003 0 012.76 3.41L14 15H6z"/></svg>),

@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { DayOfWeek, AdminSettings as AdminSettingsType, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, Plan, Theme } from '../types';
 import Icon from './Icon';
@@ -40,6 +41,17 @@ const PlanSelector: React.FC<{ activePlan: Plan; onSelect: (plan: Plan) => void 
     </div>
 );
 
+const InfoIconWithTooltip: React.FC<{ text: string }> = ({ text }) => (
+    <div className="group relative flex items-center">
+        <Icon name="info-circle" className="w-5 h-5 text-[var(--text-secondary)]/80 cursor-pointer" />
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-[var(--background-tertiary)] text-[var(--text-primary)] text-xs font-normal rounded-lg p-3 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg border border-[var(--border-secondary)]">
+            {text.split('**').map((part, index) => 
+                index % 2 === 1 ? <strong key={index} className="font-bold text-[var(--text-accent)]">{part}</strong> : part
+            )}
+        </div>
+    </div>
+);
+
 const OpeningHoursManager: React.FC<Pick<AdminSettingsProps, 'settings' | 'onUpdateSettings'>> = ({ settings, onUpdateSettings }) => {
     // Form state for service windows
     const [swName, setSwName] = useState('');
@@ -67,7 +79,11 @@ const OpeningHoursManager: React.FC<Pick<AdminSettingsProps, 'settings' | 'onUpd
     
     return (
         <div className="space-y-4">
-            <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="clock" className="w-6 h-6 text-[var(--text-accent)]"/>Orari di Apertura e Fasce di Servizio</h3>
+            <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                <Icon name="clock" className="w-6 h-6 text-[var(--text-accent)]"/>
+                Orari di Apertura e Fasce di Servizio
+                <InfoIconWithTooltip text="Qui definisci quando il tuo ristorante è aperto. **Prima crea le fasce di servizio** (es. 'Pranzo' dalle 12:00 alle 15:00), **poi applicale ai giorni della settimana**. Questo permette al sistema di sapere esattamente quali orari proporre per le prenotazioni." />
+            </h3>
             <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
                 <h4 className="font-semibold text-[var(--text-secondary)] mb-3">1. Definisci le Fasce di Servizio</h4>
                  <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
@@ -113,48 +129,119 @@ const OpeningHoursManager: React.FC<Pick<AdminSettingsProps, 'settings' | 'onUpd
     );
 };
 
+const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSettings, onBack }) => {
+    const [saveMessage, setSaveMessage] = useState('');
+    const saveTimeoutRef = useRef<number | null>(null);
 
-const AdminSettingsPro: React.FC<AdminSettingsProps> = ({ settings, onUpdateSettings }) => {
-     // Form state for adding a new table
+    // This wrapper function shows the save confirmation message
+    const handleSettingChange = (update: Partial<AdminSettingsType>) => {
+        onUpdateSettings(update);
+        setSaveMessage('Impostazioni salvate!');
+        if (saveTimeoutRef.current) {
+            clearTimeout(saveTimeoutRef.current);
+        }
+        saveTimeoutRef.current = window.setTimeout(() => setSaveMessage(''), 2500);
+    };
+
+    // PRO settings state and handlers
     const [newTableName, setNewTableName] = useState('');
     const [newTableCapacity, setNewTableCapacity] = useState(2);
     const [isCombinable, setIsCombinable] = useState(true);
-    // Form state for adding a new combination rule
     const [ruleCount, setRuleCount] = useState(2);
     const [ruleTableCapacity, setRuleTableCapacity] = useState(4);
     const [ruleNewCapacity, setRuleNewCapacity] = useState(6);
-    // Form state for adding a new duration rule
     const [durationMinGuests, setDurationMinGuests] = useState(1);
     const [durationMaxGuests, setDurationMaxGuests] = useState(2);
     const [durationMinutes, setDurationMinutes] = useState(90);
     
     const handleAddTable = () => {
         if (!newTableName.trim() || newTableCapacity < 1) return;
-        const newTable: Table = {
-            id: `table-${Date.now()}`, name: newTableName, capacity: newTableCapacity, isCombinable: isCombinable
-        };
-        onUpdateSettings({ tables: [...settings.tables, newTable].sort((a,b) => a.name.localeCompare(b.name)) });
+        const newTable: Table = { id: `table-${Date.now()}`, name: newTableName, capacity: newTableCapacity, isCombinable: isCombinable };
+        handleSettingChange({ tables: [...settings.tables, newTable].sort((a, b) => a.name.localeCompare(b.name)) });
         setNewTableName(''); setNewTableCapacity(2); setIsCombinable(true);
     };
-    const handleRemoveTable = (id: string) => onUpdateSettings({ tables: settings.tables.filter(t => t.id !== id) });
+    const handleRemoveTable = (id: string) => handleSettingChange({ tables: settings.tables.filter(t => t.id !== id) });
     const handleAddRule = () => {
         if (ruleCount < 2 || ruleTableCapacity < 1 || ruleNewCapacity < 1) return;
-        onUpdateSettings({ combinationRules: [...settings.combinationRules, { id: `rule-${Date.now()}`, count: ruleCount, tableCapacity: ruleTableCapacity, newCapacity: ruleNewCapacity }] });
+        handleSettingChange({ combinationRules: [...settings.combinationRules, { id: `rule-${Date.now()}`, count: ruleCount, tableCapacity: ruleTableCapacity, newCapacity: ruleNewCapacity }] });
     };
-    const handleRemoveRule = (id: string) => onUpdateSettings({ combinationRules: settings.combinationRules.filter(r => r.id !== id) });
+    const handleRemoveRule = (id: string) => handleSettingChange({ combinationRules: settings.combinationRules.filter(r => r.id !== id) });
     const handleAddDurationRule = () => {
         if (durationMinGuests < 1 || durationMaxGuests < durationMinGuests || durationMinutes < 30) return;
-        onUpdateSettings({ bookingDurationRules: [...settings.bookingDurationRules, { id: `duration-${Date.now()}`, minGuests: durationMinGuests, maxGuests: durationMaxGuests, durationMinutes: durationMinutes }] });
+        handleSettingChange({ bookingDurationRules: [...settings.bookingDurationRules, { id: `duration-${Date.now()}`, minGuests: durationMinGuests, maxGuests: durationMaxGuests, durationMinutes: durationMinutes }] });
     };
-    const handleRemoveDurationRule = (id: string) => onUpdateSettings({ bookingDurationRules: settings.bookingDurationRules.filter(r => r.id !== id) });
-    
-    return (
-        <div className="space-y-8">
-            <OpeningHoursManager settings={settings} onUpdateSettings={onUpdateSettings} />
+    const handleRemoveDurationRule = (id: string) => handleSettingChange({ bookingDurationRules: settings.bookingDurationRules.filter(r => r.id !== id) });
 
+    // BASIC settings handler
+    const handleMaxGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        handleSettingChange({ maxGuestsPerSlot: parseInt(e.target.value, 10) || 0 });
+    };
+
+    const DisabledSectionWrapper: React.FC<{ isDisabled: boolean; children: React.ReactNode; planName: 'PRO' | 'BASIC' }> = ({ isDisabled, children, planName }) => {
+        if (!isDisabled) {
+            return <>{children}</>;
+        }
+    
+        const message = planName === 'PRO'
+            ? "Passa al piano PRO per sbloccare la gestione avanzata di tavoli, combinazioni e turnover."
+            : "Questa è una funzionalità del piano BASIC per una gestione semplificata. Attiva il piano BASIC per usarla.";
+    
+        return (
+            <div className="relative my-8">
+                {/* Content is now readable underneath */}
+                <div className="pointer-events-none select-none" aria-hidden="true">
+                    {children}
+                </div>
+
+                {/* A semi-transparent overlay instead of blur + opacity on content */}
+                <div className="absolute inset-0 bg-[var(--background-secondary)] opacity-80 rounded-xl"></div>
+                
+                {/* The message on top */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 z-10">
+                    <div className="bg-[var(--background-tertiary)]/80 backdrop-blur-sm p-6 rounded-lg border border-[var(--border-primary)] shadow-lg max-w-sm">
+                        <Icon name="lock" className="w-8 h-8 text-[var(--text-accent)] mx-auto mb-3" />
+                        <h4 className="font-bold text-lg text-[var(--text-primary)]">
+                            Funzionalità {planName} Bloccata
+                        </h4>
+                        <p className="text-sm text-[var(--text-secondary)] mt-1 mb-4">
+                            {message}
+                        </p>
+                        {planName === 'PRO' && (
+                            <button
+                              onClick={() => handleSettingChange({ activePlan: Plan.PRO })}
+                              className="w-full bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-colors text-sm">
+                                Fai l'Upgrade al Piano PRO
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const renderBasicSettings = () => (
+        <>
+            <OpeningHoursManager settings={settings} onUpdateSettings={handleSettingChange} />
+            <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>Capienza Massima</h3>
+                <label htmlFor="maxGuests" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Numero massimo di coperti totali per ogni fascia oraria</label>
+                <input id="maxGuests" type="number" value={settings.maxGuestsPerSlot} onChange={handleMaxGuestsChange} min="1" className="w-full bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+            </div>
+            <DisabledSectionWrapper isDisabled={true} planName="PRO">
+                 {renderProFeatures()}
+            </DisabledSectionWrapper>
+        </>
+    );
+
+    const renderProFeatures = () => (
+         <div className="space-y-8">
             {/* Table Management */}
             <div className="space-y-4">
-                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>Gestione Sala e Tavoli</h3>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>
+                    Gestione Sala e Tavoli
+                    <InfoIconWithTooltip text="In questa sezione puoi mappare la tua sala. **Aggiungi ogni tavolo** specificando il nome (es. T1, T2) e la sua capienza. Se più tavoli possono essere uniti per gruppi più grandi, **spunta 'Combinabile'**. Questo è fondamentale per il piano PRO." />
+                </h3>
                 <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
                     <h4 className="font-semibold text-[var(--text-secondary)] mb-3">Aggiungi un nuovo tavolo</h4>
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
@@ -179,7 +266,11 @@ const AdminSettingsPro: React.FC<AdminSettingsProps> = ({ settings, onUpdateSett
 
             {/* Combination Rules */}
             <div className="space-y-4">
-                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="cog" className="w-6 h-6 text-[var(--text-accent)]"/>Regole di Combinazione</h3>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <Icon name="cog" className="w-6 h-6 text-[var(--text-accent)]"/>
+                    Regole di Combinazione
+                    <InfoIconWithTooltip text="Qui definisci come i tavoli 'Combinabili' possono essere uniti. **Esempio**: se unendo 2 tavoli da 4 persone si ottiene un tavolo per 6 (e non 8, per motivi di spazio), puoi creare una regola qui. Questo permette al sistema di accettare prenotazioni per gruppi più grandi in modo intelligente." />
+                </h3>
                 <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
                     <h4 className="font-semibold text-[var(--text-secondary)] mb-3">Aggiungi regola</h4>
                     <div className="flex items-center gap-2 text-[var(--text-secondary)] flex-wrap">
@@ -204,7 +295,11 @@ const AdminSettingsPro: React.FC<AdminSettingsProps> = ({ settings, onUpdateSett
 
              {/* Duration Rules */}
             <div className="space-y-4">
-                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2"><Icon name="clock" className="w-6 h-6 text-[var(--text-accent)]"/>Gestione Turnover e Durata</h3>
+                <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center gap-2">
+                    <Icon name="clock" className="w-6 h-6 text-[var(--text-accent)]"/>
+                    Gestione Turnover e Durata
+                    <InfoIconWithTooltip text="Definisci quanto tempo un tavolo rimane occupato in base al numero di persone. **Esempio**: una coppia (1-2 persone) potrebbe occupare il tavolo per 90 minuti, mentre un gruppo più grande (5+ persone) per 150 minuti. Questo ottimizza la disponibilità." />
+                </h3>
                 <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
                     <h4 className="font-semibold text-[var(--text-secondary)] mb-3">Aggiungi regola di durata</h4>
                     <div className="flex items-center gap-2 text-[var(--text-secondary)] flex-wrap">
@@ -229,41 +324,20 @@ const AdminSettingsPro: React.FC<AdminSettingsProps> = ({ settings, onUpdateSett
             </div>
         </div>
     );
-};
 
-const AdminSettingsBasic: React.FC<AdminSettingsProps> = ({ settings, onUpdateSettings }) => {
-    
-    const handleMaxGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onUpdateSettings({ maxGuestsPerSlot: parseInt(e.target.value, 10) || 0 });
-    };
-
-    return (
-        <div className="space-y-8">
-            <OpeningHoursManager settings={settings} onUpdateSettings={onUpdateSettings} />
-            
-            {/* Max Guests */}
-            <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
-                <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>Capienza Massima</h3>
-                <label htmlFor="maxGuests" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Numero massimo di coperti totali per ogni fascia oraria</label>
-                <input id="maxGuests" type="number" value={settings.maxGuestsPerSlot} onChange={handleMaxGuestsChange} min="1" className="w-full bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
-            </div>
-        </div>
+    const renderProSettings = () => (
+        <>
+            <OpeningHoursManager settings={settings} onUpdateSettings={handleSettingChange} />
+            <DisabledSectionWrapper isDisabled={true} planName="BASIC">
+                <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                    <h3 className="text-xl font-bold text-[var(--text-primary)] mb-3 flex items-center gap-2"><Icon name="users" className="w-6 h-6 text-[var(--text-accent)]"/>Capienza Massima</h3>
+                    <label htmlFor="maxGuests" className="block text-sm font-medium text-[var(--text-secondary)] mb-1">Numero massimo di coperti totali per ogni fascia oraria</label>
+                    <input id="maxGuests" type="number" value={settings.maxGuestsPerSlot} onChange={handleMaxGuestsChange} min="1" className="w-full bg-[var(--input-background)] text-[var(--input-text)] border border-[var(--border-secondary)] rounded-md p-2 focus:ring-2 focus:border-[var(--accent-primary)] focus:ring-[var(--accent-primary)] outline-none" />
+                </div>
+            </DisabledSectionWrapper>
+            {renderProFeatures()}
+        </>
     );
-};
-
-const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSettings, onBack }) => {
-    const [saveMessage, setSaveMessage] = useState('');
-    const saveTimeoutRef = useRef<number | null>(null);
-
-    // This wrapper function shows the save confirmation message
-    const handleSettingChange = (update: Partial<AdminSettingsType>) => {
-        onUpdateSettings(update);
-        setSaveMessage('Impostazioni salvate!');
-        if (saveTimeoutRef.current) {
-            clearTimeout(saveTimeoutRef.current);
-        }
-        saveTimeoutRef.current = window.setTimeout(() => setSaveMessage(''), 2500);
-    };
 
     return (
         <div className="bg-[var(--background-secondary)] p-6 rounded-xl border border-[var(--border-primary)] space-y-8">
@@ -309,11 +383,8 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSetting
                 />
             </div>
             
-            {settings.activePlan === Plan.PRO
-                ? <AdminSettingsPro settings={settings} onUpdateSettings={handleSettingChange} onBack={onBack} />
-                : <AdminSettingsBasic settings={settings} onUpdateSettings={handleSettingChange} onBack={onBack} />
-            }
-            
+            {settings.activePlan === Plan.BASIC ? renderBasicSettings() : renderProSettings()}
+
             <div className="pt-4 border-t border-[var(--border-primary)]/50">
                 <button onClick={onBack} className="w-full bg-[var(--accent-primary)] text-[var(--accent-text)] font-bold py-3 px-4 rounded-lg hover:bg-[var(--accent-primary-hover)] transition-colors duration-300">
                     Torna alla Dashboard
