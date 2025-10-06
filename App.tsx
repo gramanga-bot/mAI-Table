@@ -169,6 +169,26 @@ const App: React.FC = () => {
         document.body.dataset.theme = settings.theme;
         localStorage.setItem('restaurantSettings', JSON.stringify(settings));
     }, [settings]);
+    
+    useEffect(() => {
+        const fetchBookings = async () => {
+            try {
+                const response = await fetch('/api/bookings');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch bookings');
+                }
+                const data = await response.json();
+                setBookings(data);
+            } catch (err) {
+                console.error(err);
+                setError("Impossibile caricare le prenotazioni dal database.");
+            }
+        };
+
+        if (view === 'admin') {
+            fetchBookings();
+        }
+    }, [view]);
 
     const handleSettingsUpdate = useCallback((newSettings: Partial<AdminSettingsType>) => {
         setSettings(prev => ({ ...prev, ...newSettings }));
@@ -216,25 +236,41 @@ const App: React.FC = () => {
         setError(null);
         setStep(AppStep.CONFIRMING);
 
-        const newBooking: BookingDetails = {
+        const bookingDataForApi = {
             ...details,
-            id: `booking-${Date.now()}`,
             status: BookingStatus.PENDING,
             assignedTableIds: assignedTableIds,
         };
         
-        setCurrentBookingDetails(newBooking);
-        setBookings(prev => [...prev, newBooking]);
+        let createdBooking: BookingDetails | null = null;
 
         try {
-            const messages = await generateBookingRequestMessages(newBooking, settings.restaurantName, settings.restaurantAddress, language, t('locale'));
+            const response = await fetch('/api/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingDataForApi),
+            });
+
+            if (!response.ok) {
+                const errData = await response.json();
+                throw new Error(errData.error || 'Failed to save booking');
+            }
+            
+            createdBooking = await response.json();
+            
+            setCurrentBookingDetails(createdBooking);
+            setBookings(prev => [createdBooking!, ...prev]);
+
+            const messages = await generateBookingRequestMessages(createdBooking, settings.restaurantName, settings.restaurantAddress, language, t('locale'));
             setConfirmationMessages(messages);
             setStep(AppStep.CONFIRMED);
         } catch (err) {
-            console.error("Error generating request messages:", err);
+            console.error("Error during booking request:", err);
             setError("Siamo spiacenti, ma il nostro assistente AI è attualmente occupato. Riprova tra qualche istante.");
             setStep(AppStep.FORM);
-            setBookings(prev => prev.filter(b => b.id !== newBooking.id));
+            if (createdBooking) {
+                setBookings(prev => prev.filter(b => b.id !== createdBooking!.id));
+            }
         } finally {
             setIsLoading(false);
         }
@@ -243,23 +279,44 @@ const App: React.FC = () => {
     const handleUpdateBookingStatus = useCallback(async (bookingId: string, status: BookingStatus) => {
         const bookingToUpdate = bookings.find(b => b.id === bookingId);
         if (!bookingToUpdate) return;
+        
+        const originalStatus = bookingToUpdate.status;
+        
+        // Optimistic UI update
+        setBookings(prev => prev.map(b => (b.id === bookingId ? { ...b, status } : b)));
+        
+        try {
+            // API call to persist change
+            const response = await fetch(`/api/bookings?id=${bookingId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status }),
+            });
 
-        if (status === BookingStatus.DECLINED) {
-            setBookings(prev => prev.map(b => (b.id === bookingId ? { ...b, status } : b)));
-        } else if (status === BookingStatus.CONFIRMED) {
-            setIsLoading(true);
-            setError(null);
-            try {
-                const finalMessages = await generateBookingConfirmationMessages(bookingToUpdate, settings.restaurantName, settings.restaurantAddress, settings.reviewLink, language, t('locale'));
-                setNotificationContent({ details: bookingToUpdate, messages: finalMessages });
-                setIsNotificationModalOpen(true);
-                setBookings(prev => prev.map(b => (b.id === bookingId ? { ...b, status } : b)));
-            } catch (err) {
-                console.error("Error generating final confirmation messages:", err);
-                alert("Impossibile generare il messaggio di conferma. Controlla la console e riprova.");
-            } finally {
-                setIsLoading(false);
+            if (!response.ok) {
+                throw new Error('Failed to update booking status');
             }
+
+            // If confirmed, generate final messages
+            if (status === BookingStatus.CONFIRMED) {
+                setIsLoading(true);
+                setError(null);
+                try {
+                    const finalMessages = await generateBookingConfirmationMessages(bookingToUpdate, settings.restaurantName, settings.restaurantAddress, settings.reviewLink, language, t('locale'));
+                    setNotificationContent({ details: { ...bookingToUpdate, status: BookingStatus.CONFIRMED }, messages: finalMessages });
+                    setIsNotificationModalOpen(true);
+                } catch (err) {
+                     console.error("Error generating final confirmation messages:", err);
+                     alert("Impossibile generare il messaggio di conferma. Controlla la console e riprova.");
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            // Revert UI on failure
+            setBookings(prev => prev.map(b => (b.id === bookingId ? { ...b, status: originalStatus } : b)));
+            alert("Failed to update booking status in the database.");
         }
     }, [bookings, settings, language, t]);
 
