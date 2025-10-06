@@ -252,8 +252,19 @@ const App: React.FC = () => {
             });
 
             if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.error || 'Failed to save booking');
+                let errorMessage = `Errore di rete: ${response.status} ${response.statusText}`;
+                try {
+                    // Check if the response is JSON before trying to parse it
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errData = await response.json();
+                        errorMessage = errData.error || errData.message || errorMessage;
+                    }
+                } catch (jsonError) {
+                    // Not a JSON response, stick with the network error message
+                    console.error("Could not parse error response as JSON", jsonError);
+                }
+                throw new Error(errorMessage);
             }
             
             createdBooking = await response.json();
@@ -266,12 +277,21 @@ const App: React.FC = () => {
             setStep(AppStep.CONFIRMED);
         } catch (err) {
             console.error("Error during booking request:", err);
-            let userError = "Siamo spiacenti, ma il nostro assistente AI è attualmente occupato. Riprova tra qualche istante.";
-            if (err instanceof Error && (err.message.includes("empty response") || err.message.includes("invalid format"))) {
-                userError = "L'assistente AI ha restituito una risposta inaspettata. Riprova, il problema potrebbe essere temporaneo.";
+            let userError = "Siamo spiacenti, si è verificato un errore imprevisto. Riprova tra qualche istante.";
+            if (err instanceof Error) {
+                if (err.message.includes("Failed to fetch")) {
+                    userError = "Errore di connessione. Controlla la tua rete e riprova.";
+                } else if (err.message.includes("empty response") || err.message.includes("invalid format")) {
+                    userError = "L'assistente AI ha restituito una risposta inaspettata. Riprova, il problema potrebbe essere temporaneo.";
+                } else if (err.message.toLowerCase().includes("database")) {
+                    userError = "Si è verificato un problema nel salvataggio della prenotazione. Riprova.";
+                }
             }
+            
             setError(userError);
             setStep(AppStep.FORM);
+
+            // If the booking was created in the UI but something failed after, remove it
             if (createdBooking) {
                 setBookings(prev => prev.filter(b => b.id !== createdBooking!.id));
             }
