@@ -31,6 +31,13 @@ export default async function handler(request: Request) {
         const newBooking: Omit<BookingDetails, 'id'> = await request.json();
         const bookingId = crypto.randomUUID();
         
+        // FIX: Manually format arrays into PostgreSQL array literal strings
+        // to conform to the `Primitive` type expected by `@vercel/postgres`.
+        const platformsPgArray = `{${newBooking.platforms.join(',')}}`;
+        const assignedTablesPgArray = newBooking.assignedTableIds && newBooking.assignedTableIds.length > 0 
+            ? `{${newBooking.assignedTableIds.join(',')}}` 
+            : null;
+
         await pool.sql`
           INSERT INTO bookings (id, name, email, phone, date, "time", adults, children, platforms, status, assigned_table_ids)
           VALUES (
@@ -42,9 +49,9 @@ export default async function handler(request: Request) {
             ${newBooking.time}, 
             ${newBooking.adults}, 
             ${newBooking.children}, 
-            ${newBooking.platforms}, 
+            ${platformsPgArray}, 
             ${newBooking.status}, 
-            ${newBooking.assignedTableIds && newBooking.assignedTableIds.length > 0 ? newBooking.assignedTableIds : null}
+            ${assignedTablesPgArray}
           );
         `;
         
