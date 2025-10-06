@@ -4,16 +4,13 @@ import App from './App';
 import { ClerkProvider } from '@clerk/clerk-react';
 
 // Clerk's Publishable Key must be passed to the ClerkProvider.
-// It can be found in the Clerk Dashboard. For security, we load it from an environment variable.
-// VITE_CLERK_PUBLISHABLE_KEY is the standard for Vite-based projects.
-// The Vercel integration for Clerk sometimes defaults to the Next.js standard, NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY.
-// We check for both to ensure compatibility.
-const env = (import.meta as any).env || {};
-const PUBLISHABLE_KEY = env.VITE_CLERK_PUBLISHABLE_KEY || env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || (window as any).process?.env?.CLERK_PUBLISHABLE_KEY;
+// It can be found in the Clerk Dashboard and should be set as an environment variable.
+// For Vite projects, this variable MUST be named VITE_CLERK_PUBLISHABLE_KEY.
+const PUBLISHABLE_KEY = (import.meta as any).env.VITE_CLERK_PUBLISHABLE_KEY;
 
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk Publishable Key. Please set VITE_CLERK_PUBLISHABLE_KEY or NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY in your environment.");
+  throw new Error("Missing Publishable Key. Please set VITE_CLERK_PUBLISHABLE_KEY in your Vercel project environment variables.");
 }
 
 const rootElement = document.getElementById('root');
