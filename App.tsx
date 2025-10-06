@@ -111,6 +111,41 @@ const findAvailableTablesPro = (
     return null;
 };
 
+const defaultSettings: AdminSettingsType = {
+    restaurantName: 'The Golden Spoon',
+    restaurantAddress: 'Via Roma, 1, 10121 Torino TO, Italia',
+    reviewLink: '',
+    activePlan: Plan.PRO,
+    theme: Theme.GOLDEN_SPOON,
+    // Shared settings
+    serviceWindows: [
+        { id: 'sw-lunch', name: 'Pranzo', startTime: '12:00', endTime: '14:30', slotInterval: 30 },
+        { id: 'sw-dinner', name: 'Cena', startTime: '19:00', endTime: '22:00', slotInterval: 30 },
+    ],
+    weeklySchedule: {
+        [DayOfWeek.SUNDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.MONDAY]: [], [DayOfWeek.TUESDAY]: ['sw-dinner'],
+        [DayOfWeek.WEDNESDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.THURSDAY]: ['sw-lunch', 'sw-dinner'],
+        [DayOfWeek.FRIDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.SATURDAY]: ['sw-lunch', 'sw-dinner'],
+    },
+    // Digital Menu
+    digitalMenu: null,
+    // PRO settings
+    tables: Array.from({ length: 10 }, (_, i) => ({
+        id: `t4-${i + 1}`, name: `Tavolo ${i + 1}`, capacity: 4, isCombinable: true,
+    })),
+    combinationRules: [
+        { id: 'rule-1', count: 2, tableCapacity: 4, newCapacity: 6 },
+        { id: 'rule-2', count: 3, tableCapacity: 4, newCapacity: 8 },
+    ],
+    bookingDurationRules: [
+        { id: 'dur-1', minGuests: 1, maxGuests: 2, durationMinutes: 90 },
+        { id: 'dur-2', minGuests: 3, maxGuests: 4, durationMinutes: 120 },
+        { id: 'dur-3', minGuests: 5, maxGuests: 100, durationMinutes: 150 },
+    ],
+    // BASIC settings
+    maxGuestsPerSlot: 30,
+};
+
 
 const App: React.FC = () => {
     const [step, setStep] = useState<AppStep>(AppStep.FORM);
@@ -123,53 +158,37 @@ const App: React.FC = () => {
     const [adminView, setAdminView] = useState<AdminView>('dashboard');
     const [language, setLanguage] = useState<Language>('it');
     
-    // Unified Settings State
-    const [settings, setSettings] = useState<AdminSettingsType>(() => {
-        const savedSettings = localStorage.getItem('restaurantSettings');
-        const defaultSettings: AdminSettingsType = {
-            restaurantName: 'The Golden Spoon',
-            restaurantAddress: 'Via Roma, 1, 10121 Torino TO, Italia',
-            reviewLink: '',
-            activePlan: Plan.PRO,
-            theme: Theme.GOLDEN_SPOON,
-            // Shared settings
-            serviceWindows: [
-                { id: 'sw-lunch', name: 'Pranzo', startTime: '12:00', endTime: '14:30', slotInterval: 30 },
-                { id: 'sw-dinner', name: 'Cena', startTime: '19:00', endTime: '22:00', slotInterval: 30 },
-            ],
-            weeklySchedule: {
-                [DayOfWeek.SUNDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.MONDAY]: [], [DayOfWeek.TUESDAY]: ['sw-dinner'],
-                [DayOfWeek.WEDNESDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.THURSDAY]: ['sw-lunch', 'sw-dinner'],
-                [DayOfWeek.FRIDAY]: ['sw-lunch', 'sw-dinner'], [DayOfWeek.SATURDAY]: ['sw-lunch', 'sw-dinner'],
-            },
-            // Digital Menu
-            digitalMenu: null,
-            // PRO settings
-            tables: Array.from({ length: 10 }, (_, i) => ({
-                id: `t4-${i + 1}`, name: `Tavolo ${i + 1}`, capacity: 4, isCombinable: true,
-            })),
-            combinationRules: [
-                { id: 'rule-1', count: 2, tableCapacity: 4, newCapacity: 6 },
-                { id: 'rule-2', count: 3, tableCapacity: 4, newCapacity: 8 },
-            ],
-            bookingDurationRules: [
-                { id: 'dur-1', minGuests: 1, maxGuests: 2, durationMinutes: 90 },
-                { id: 'dur-2', minGuests: 3, maxGuests: 4, durationMinutes: 120 },
-                { id: 'dur-3', minGuests: 5, maxGuests: 100, durationMinutes: 150 },
-            ],
-            // BASIC settings
-            maxGuestsPerSlot: 30,
-        };
-        return savedSettings ? { ...defaultSettings, ...JSON.parse(savedSettings) } : defaultSettings;
-    });
+    // Unified Settings State, fetched from DB
+    const [settings, setSettings] = useState<AdminSettingsType>(defaultSettings);
+    const [isSettingsLoading, setIsSettingsLoading] = useState<boolean>(true);
+
 
     useEffect(() => {
         document.body.dataset.theme = settings.theme;
-        localStorage.setItem('restaurantSettings', JSON.stringify(settings));
-    }, [settings]);
+    }, [settings.theme]);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const response = await fetch('/api/settings');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch settings');
+                }
+                const data = await response.json();
+                setSettings(data);
+            } catch (err) {
+                console.error(err);
+                setError("Impossibile caricare le impostazioni del ristorante. Verranno usate quelle di default.");
+            } finally {
+                setIsSettingsLoading(false);
+            }
+        };
+        fetchSettings();
+    }, []);
     
     useEffect(() => {
         const fetchBookings = async () => {
+            if (isSettingsLoading) return; // Wait for settings to load
             try {
                 const response = await fetch('/api/bookings');
                 if (!response.ok) {
@@ -186,11 +205,28 @@ const App: React.FC = () => {
         if (view === 'admin') {
             fetchBookings();
         }
-    }, [view]);
+    }, [view, isSettingsLoading]);
 
-    const handleSettingsUpdate = useCallback((newSettings: Partial<AdminSettingsType>) => {
-        setSettings(prev => ({ ...prev, ...newSettings }));
-    }, []);
+    const handleSettingsUpdate = useCallback(async (newSettingsPartial: Partial<AdminSettingsType>) => {
+        const newSettings = { ...settings, ...newSettingsPartial };
+        setSettings(newSettings); // Optimistic UI update
+
+        try {
+            const response = await fetch('/api/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newSettings),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to save settings');
+            }
+        } catch (err) {
+            console.error(err);
+            setError("Errore nel salvataggio delle impostazioni sul server.");
+            // Note: We are not reverting the optimistic update for a simpler UX.
+            // A more robust solution might involve reverting and showing a persistent error.
+        }
+    }, [settings]);
 
     const translations = useMemo(() => (language === 'it' ? it : en), [language]);
     
@@ -278,7 +314,7 @@ const App: React.FC = () => {
             if (err instanceof Error) {
                 const lowerCaseMessage = err.message.toLowerCase();
                 if (lowerCaseMessage.includes("failed to fetch") || lowerCaseMessage.includes("network") || lowerCaseMessage.includes("errore di rete")) {
-                    userError = "Errore di connessione. L'ambiente AI Studio non può salvare le prenotazioni, quindi questo errore è normale durante i test qui.";
+                     userError = "Errore di connessione. Sembra che ci sia un problema a comunicare con il server. Controlla la tua connessione o riprova più tardi.";
                 } else if (lowerCaseMessage.includes("empty response") || lowerCaseMessage.includes("invalid format")) {
                     userError = "L'assistente AI ha restituito una risposta inaspettata. Riprova, il problema potrebbe essere temporaneo.";
                 } else if (lowerCaseMessage.includes("database")) {
@@ -378,6 +414,15 @@ const App: React.FC = () => {
             return { name: window.name, slots };
         });
     }, [settings.weeklySchedule, settings.serviceWindows]);
+
+    if (isSettingsLoading) {
+        return (
+            <div className="min-h-screen bg-[var(--background-primary)] flex flex-col items-center justify-center">
+                <div className="w-16 h-16 border-4 border-[var(--accent-primary)] border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-white mt-4 text-lg">Caricamento impostazioni...</p>
+            </div>
+        );
+    }
 
     const renderCustomerView = () => (
         <>

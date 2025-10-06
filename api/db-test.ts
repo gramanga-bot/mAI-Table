@@ -4,16 +4,44 @@ export const config = {
   runtime: 'edge',
 };
 
-// Create a new pool configured to use the STORAGE_URL from environment variables,
-// as the user is setting a custom prefix in the Vercel integration.
 const pool = createPool({
     connectionString: process.env.STORAGE_URL,
 });
 
 export default async function handler(request: Request) {
   try {
+    // Ensure tables exist
+    await pool.sql`
+      CREATE TABLE IF NOT EXISTS bookings (
+        id UUID PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        phone VARCHAR(30) NOT NULL,
+        date DATE NOT NULL,
+        "time" VARCHAR(5) NOT NULL,
+        adults INTEGER NOT NULL,
+        children INTEGER NOT NULL,
+        platforms TEXT[] NOT NULL,
+        status VARCHAR(20) NOT NULL,
+        assigned_table_ids TEXT[]
+      );
+    `;
+
+    await pool.sql`
+      CREATE TABLE IF NOT EXISTS restaurant_settings (
+        id INTEGER PRIMARY KEY,
+        settings JSONB NOT NULL
+      );
+    `;
+    
+    // Test connection by getting current time
     const { rows } = await pool.sql`SELECT NOW();`;
-    return new Response(JSON.stringify({ status: 'success', time: rows[0].now }), {
+    
+    return new Response(JSON.stringify({ 
+      status: 'success', 
+      message: 'Tabelle del database verificate e connessione riuscita.',
+      time: rows[0].now 
+    }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
