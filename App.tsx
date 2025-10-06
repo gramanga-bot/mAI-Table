@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { SignedIn, SignedOut, UserButton, SignInButton } from '@clerk/clerk-react';
 import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType, Theme, GroupedTimeSlot } from './types';
 import BookingForm from './components/BookingForm';
 import ConfirmationModal from './components/ConfirmationModal';
@@ -12,7 +13,6 @@ import AdminSettings from './components/AdminSettings';
 import it from './locales/it.js';
 import en from './locales/en.js';
 
-type View = 'customer' | 'admin';
 type Language = 'it' | 'en';
 type AdminView = 'dashboard' | 'settings';
 
@@ -154,7 +154,6 @@ const App: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [bookings, setBookings] = useState<BookingDetails[]>([]);
-    const [view, setView] = useState<View>('customer');
     const [adminView, setAdminView] = useState<AdminView>('dashboard');
     const [language, setLanguage] = useState<Language>('it');
     
@@ -202,10 +201,10 @@ const App: React.FC = () => {
             }
         };
 
-        if (view === 'admin') {
-            fetchBookings();
-        }
-    }, [view, isSettingsLoading]);
+        // We only fetch bookings in the admin view, which is now only accessible when signed in.
+        // This effect will run when the user signs in and the <SignedIn> component mounts.
+        fetchBookings();
+    }, [isSettingsLoading]);
 
     const handleSettingsUpdate = useCallback(async (newSettingsPartial: Partial<AdminSettingsType>) => {
         const newSettings = { ...settings, ...newSettingsPartial };
@@ -383,13 +382,6 @@ const App: React.FC = () => {
         setConfirmationMessages(null);
         setError(null);
     }, []);
-
-    const handleViewChange = (targetView: View) => {
-        if (view === 'admin' && targetView === 'customer') {
-            setAdminView('dashboard'); // Reset when leaving admin panel
-        }
-        setView(targetView);
-    };
     
     const getGroupedSlotsForDate = useCallback((date: string): GroupedTimeSlot[] => {
         const dayOfWeek = new Date(date).getUTCDay().toString() as DayOfWeek;
@@ -424,7 +416,7 @@ const App: React.FC = () => {
         );
     }
 
-    const renderCustomerView = () => (
+    const renderPublicView = () => (
         <>
             <header className="text-center mb-8">
                 <h1 className="text-4xl md:text-5xl font-bold text-[var(--text-accent)] tracking-tight">
@@ -448,7 +440,7 @@ const App: React.FC = () => {
         </>
     );
 
-    const renderAdminView = () => {
+    const renderAdminAuthenticatedView = () => {
         if (adminView === 'settings') {
             return (
                 <div className="w-full max-w-4xl mx-auto">
@@ -505,22 +497,29 @@ const App: React.FC = () => {
                     </div>
                     
                     {/* Actions container */}
-                    <div className="flex items-center justify-between md:justify-end md:gap-4">
+                    <div className="flex items-center justify-center md:justify-end md:gap-4">
                         <LanguageSwitcher currentLang={language} onLanguageChange={setLanguage} />
-                        <div className="flex items-center gap-2 bg-[var(--background-tertiary)] p-1 rounded-lg">
-                            <button onClick={() => handleViewChange('customer')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'customer' ? 'bg-[var(--accent-primary)] text-[var(--accent-text)]' : 'text-[var(--text-secondary)] hover:bg-[var(--background-interactive)]'}`}>
-                                {t('nav.book')}
-                            </button>
-                            <button onClick={() => handleViewChange('admin')} className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${view === 'admin' ? 'bg-[var(--accent-primary)] text-[var(--accent-text)]' : 'text-[var(--text-secondary)] hover:bg-[var(--background-interactive)]'}`}>
-                                Admin
-                            </button>
-                        </div>
+                        <SignedIn>
+                           <UserButton afterSignOutUrl="/" />
+                        </SignedIn>
+                        <SignedOut>
+                            <SignInButton mode="modal" afterSignInUrl="/" afterSignUpUrl="/">
+                                <button className="px-4 py-2 text-sm font-semibold rounded-md transition-colors bg-[var(--accent-primary)] text-[var(--accent-text)] hover:bg-[var(--accent-primary-hover)]">
+                                    Admin Login
+                                </button>
+                            </SignInButton>
+                        </SignedOut>
                     </div>
                 </div>
             </nav>
             
             <div className="w-full flex-1 flex flex-col items-center justify-center">
-                {view === 'customer' ? renderCustomerView() : renderAdminView()}
+                <SignedOut>
+                    {renderPublicView()}
+                </SignedOut>
+                <SignedIn>
+                    {renderAdminAuthenticatedView()}
+                </SignedIn>
             </div>
             
             {step === AppStep.CONFIRMED && currentBookingDetails && confirmationMessages && (

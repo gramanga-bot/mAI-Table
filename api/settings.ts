@@ -6,7 +6,7 @@ export const config = {
 };
 
 const pool = createPool({
-    connectionString: process.env.STORAGE_URL,
+    connectionString: process.env.POSTGRES_URL,
 });
 
 const defaultSettings: AdminSettings = {

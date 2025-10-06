@@ -6,10 +6,10 @@ export const config = {
   runtime: 'edge',
 };
 
-// Create a new pool configured to use the STORAGE_URL from environment variables,
-// as the user is setting a custom prefix in the Vercel integration.
+// Create a new pool configured to use the POSTGRES_URL from environment variables,
+// which is the standard provided by the Vercel Postgres integration.
 const pool = createPool({
-    connectionString: process.env.STORAGE_URL, 
+    connectionString: process.env.POSTGRES_URL, 
 });
 
 export default async function handler(request: Request) {
