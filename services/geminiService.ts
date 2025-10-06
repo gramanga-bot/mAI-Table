@@ -1,13 +1,16 @@
 
 
+
 import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { BookingDetails, ConfirmationMessages, MenuCategory, Allergen, DietaryProfile, MenuItem } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
+// FIX: Cast `import.meta` to `any` to access Vite environment variables without TypeScript errors.
+const apiKey = (import.meta as any).env.VITE_API_KEY;
+if (!apiKey) {
+    throw new Error("VITE_API_KEY environment variable not set");
 }
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const ai = new GoogleGenAI({ apiKey });
 
 const responseSchema = {
     type: Type.OBJECT,

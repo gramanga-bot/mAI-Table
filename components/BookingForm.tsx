@@ -38,7 +38,8 @@ const dayLabels: Record<DayOfWeek, string> = {
 };
 
 // A new global variable for the AI client, as it's needed for the live session
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+// FIX: Cast `import.meta` to `any` to access Vite environment variables without TypeScript errors.
+const ai = new GoogleGenAI({ apiKey: (import.meta as any).env.VITE_API_KEY! });
 
 const BookingForm: React.FC<BookingFormProps> = ({ 
     onBook, initialDetails, error, t, 
