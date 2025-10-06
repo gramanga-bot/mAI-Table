@@ -14,7 +14,7 @@ export default async function handler(request: Request) {
   try {
     switch (method) {
       case 'GET': {
-        const { rows: bookings } = await sql`SELECT * FROM bookings ORDER BY created_at DESC;`;
+        const { rows: bookings } = await sql`SELECT * FROM bookings ORDER BY date DESC, "time" DESC;`;
         return new Response(JSON.stringify(bookings), {
           status: 200,
           headers: { 'Content-Type': 'application/json' },
