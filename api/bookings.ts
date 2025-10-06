@@ -36,9 +36,9 @@ export default async function handler(request: Request) {
             ${newBooking.time}, 
             ${newBooking.adults}, 
             ${newBooking.children}, 
-            ${JSON.stringify(newBooking.platforms)}, 
+            ${newBooking.platforms}, 
             ${newBooking.status}, 
-            ${newBooking.assignedTableIds && newBooking.assignedTableIds.length > 0 ? JSON.stringify(newBooking.assignedTableIds) : null}
+            ${newBooking.assignedTableIds && newBooking.assignedTableIds.length > 0 ? newBooking.assignedTableIds : null}
           );
         `;
         
