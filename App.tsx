@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType, Theme, GroupedTimeSlot } from './types';
 import BookingForm from './components/BookingForm';
@@ -203,7 +204,8 @@ const App: React.FC = () => {
         }
 
         if (!isAvailable) {
-            setError(settings.activeplan === Plan.PRO
+            // FIX: Corrected typo from `activeplan` to `activePlan`.
+            setError(settings.activePlan === Plan.PRO
                 ? "Siamo spiacenti, non ci sono tavoli disponibili per la data, l'orario e la durata richiesti. Prova a modificare la richiesta."
                 : "Siamo spiacenti, la fascia oraria richiesta è al completo. Prova un altro orario."
             );

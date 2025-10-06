@@ -42,6 +42,7 @@
         --input-text: #F9FAFB;
         --input-placeholder: #9CA3AF;
         --checkbox-background: #4B5563;
+        --date-picker-filter: invert(0.8);
       }
       [data-theme="midnight-slate"] {
         --background-primary: #0D1117;
@@ -71,6 +72,7 @@
         --input-text: #E6EDF3;
         --input-placeholder: #8B949E;
         --checkbox-background: #30363d;
+        --date-picker-filter: invert(0.8);
       }
       [data-theme="classic-ivory"] {
         --background-primary: #FDFDFB;
@@ -100,6 +102,7 @@
         --input-text: #111827;
         --input-placeholder: #9CA3AF;
         --checkbox-background: #E5E7EB;
+        --date-picker-filter: invert(0.2);
       }
       [data-theme="tuscan-cream"] {
         --background-primary: #FBF9F4;
@@ -129,6 +132,7 @@
         --input-text: #422006;
         --input-placeholder: #a8a29e;
         --checkbox-background: #E7E5E4;
+        --date-picker-filter: invert(0.2);
       }
       
       body {
@@ -149,7 +153,7 @@
         background: var(--background-interactive);
       }
       input[type="date"]::-webkit-calendar-picker-indicator {
-        filter: var(--text-primary) == "#F9FAFB" || var(--text-primary) == "#E6EDF3" ? invert(0.8) : invert(0.2);
+        filter: var(--date-picker-filter);
         cursor: pointer;
       }
       /* Custom Checkbox Style */
