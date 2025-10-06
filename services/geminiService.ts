@@ -66,13 +66,25 @@ For the email, also include the restaurant's address: ${restaurantAddress}. Add 
             },
         });
         
-        const jsonStr = response.text.trim();
-        const parsedResponse = JSON.parse(jsonStr);
-
-        return parsedResponse as ConfirmationMessages;
+        const jsonStr = response.text?.trim();
+        if (!jsonStr) {
+            console.error("Gemini API call failed: The response text is empty. This could be due to safety filters or a model issue.");
+            throw new Error("Failed to generate messages: AI returned an empty response.");
+        }
+        try {
+            const parsedResponse = JSON.parse(jsonStr);
+            return parsedResponse as ConfirmationMessages;
+        } catch (e) {
+            console.error("Gemini API call failed: Could not parse the JSON response.", { json: jsonStr, error: e });
+            throw new Error("Failed to generate messages: AI returned an invalid format.");
+        }
 
     } catch (error) {
         console.error("Gemini API call failed:", error);
+        // Re-throw the specific error if we created one, otherwise a generic one.
+        if (error instanceof Error && (error.message.includes("empty response") || error.message.includes("invalid format"))) {
+            throw error;
+        }
         throw new Error("Failed to generate booking request messages from AI.");
     }
 };
@@ -112,13 +124,24 @@ For the email, please add a P.S. section. In this section, invite the user to le
             },
         });
         
-        const jsonStr = response.text.trim();
-        const parsedResponse = JSON.parse(jsonStr);
-
-        return parsedResponse as ConfirmationMessages;
+        const jsonStr = response.text?.trim();
+        if (!jsonStr) {
+            console.error("Gemini API call failed: The response text is empty. This could be due to safety filters or a model issue.");
+            throw new Error("Failed to generate messages: AI returned an empty response.");
+        }
+        try {
+            const parsedResponse = JSON.parse(jsonStr);
+            return parsedResponse as ConfirmationMessages;
+        } catch (e) {
+            console.error("Gemini API call failed: Could not parse the JSON response.", { json: jsonStr, error: e });
+            throw new Error("Failed to generate messages: AI returned an invalid format.");
+        }
 
     } catch (error) {
         console.error("Gemini API call for confirmation failed:", error);
+        if (error instanceof Error && (error.message.includes("empty response") || error.message.includes("invalid format"))) {
+            throw error;
+        }
         throw new Error("Failed to generate final confirmation messages from AI.");
     }
 };

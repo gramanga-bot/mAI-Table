@@ -266,7 +266,11 @@ const App: React.FC = () => {
             setStep(AppStep.CONFIRMED);
         } catch (err) {
             console.error("Error during booking request:", err);
-            setError("Siamo spiacenti, ma il nostro assistente AI è attualmente occupato. Riprova tra qualche istante.");
+            let userError = "Siamo spiacenti, ma il nostro assistente AI è attualmente occupato. Riprova tra qualche istante.";
+            if (err instanceof Error && (err.message.includes("empty response") || err.message.includes("invalid format"))) {
+                userError = "L'assistente AI ha restituito una risposta inaspettata. Riprova, il problema potrebbe essere temporaneo.";
+            }
+            setError(userError);
             setStep(AppStep.FORM);
             if (createdBooking) {
                 setBookings(prev => prev.filter(b => b.id !== createdBooking!.id));
