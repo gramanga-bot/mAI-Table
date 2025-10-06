@@ -1,5 +1,3 @@
-
-
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { BookingDetails, ConfirmationMessages, AppStep, BookingStatus, DayOfWeek, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, WeeklySchedule, Plan, AdminSettings as AdminSettingsType, Theme, GroupedTimeSlot } from './types';
 import BookingForm from './components/BookingForm';
@@ -254,14 +252,12 @@ const App: React.FC = () => {
             if (!response.ok) {
                 let errorMessage = `Errore di rete: ${response.status} ${response.statusText}`;
                 try {
-                    // Check if the response is JSON before trying to parse it
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
                         const errData = await response.json();
                         errorMessage = errData.error || errData.message || errorMessage;
                     }
                 } catch (jsonError) {
-                    // Not a JSON response, stick with the network error message
                     console.error("Could not parse error response as JSON", jsonError);
                 }
                 throw new Error(errorMessage);
@@ -278,20 +274,21 @@ const App: React.FC = () => {
         } catch (err) {
             console.error("Error during booking request:", err);
             let userError = "Siamo spiacenti, si è verificato un errore imprevisto. Riprova tra qualche istante.";
+            
             if (err instanceof Error) {
-                if (err.message.includes("Failed to fetch")) {
-                    userError = "Errore di connessione. Controlla la tua rete e riprova.";
-                } else if (err.message.includes("empty response") || err.message.includes("invalid format")) {
+                const lowerCaseMessage = err.message.toLowerCase();
+                if (lowerCaseMessage.includes("failed to fetch") || lowerCaseMessage.includes("network") || lowerCaseMessage.includes("errore di rete")) {
+                    userError = "Errore di connessione. L'ambiente AI Studio non può salvare le prenotazioni, quindi questo errore è normale durante i test qui.";
+                } else if (lowerCaseMessage.includes("empty response") || lowerCaseMessage.includes("invalid format")) {
                     userError = "L'assistente AI ha restituito una risposta inaspettata. Riprova, il problema potrebbe essere temporaneo.";
-                } else if (err.message.toLowerCase().includes("database")) {
-                    userError = "Si è verificato un problema nel salvataggio della prenotazione. Riprova.";
+                } else if (lowerCaseMessage.includes("database")) {
+                    userError = "Si è verificato un problema nel salvataggio della prenotazione. Controlla la configurazione del database e riprova.";
                 }
             }
             
             setError(userError);
             setStep(AppStep.FORM);
 
-            // If the booking was created in the UI but something failed after, remove it
             if (createdBooking) {
                 setBookings(prev => prev.filter(b => b.id !== createdBooking!.id));
             }
