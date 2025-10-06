@@ -3,15 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import { ClerkProvider } from '@clerk/clerk-react';
 
-// Support both Vite's `import.meta.env` and AI Studio's `process.env` for the key.
-// This robust check works in Vercel/Vite (import.meta.env) and AI Studio (process.env).
-const PUBLISHABLE_KEY = 
-    (import.meta as any).env?.VITE_CLERK_PUBLISHABLE_KEY || 
-    (typeof process !== 'undefined' && process.env?.VITE_CLERK_PUBLISHABLE_KEY);
+// Clerk's Publishable Key must be passed to the ClerkProvider.
+// It can be found in the Clerk Dashboard and should be set as an environment variable.
+// For Vite projects, this variable MUST be named VITE_CLERK_PUBLISHABLE_KEY.
+const PUBLISHABLE_KEY = (import.meta as any).env.VITE_CLERK_PUBLISHABLE_KEY;
 
 
 if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key. Please set VITE_CLERK_PUBLISHABLE_KEY in your Vercel project and AI Studio environment variables.");
+  throw new Error("Missing Publishable Key. Please set VITE_CLERK_PUBLISHABLE_KEY in your Vercel project environment variables.");
 }
 
 const rootElement = document.getElementById('root');

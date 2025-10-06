@@ -2,7 +2,7 @@ import { GoogleGenAI, Type, FunctionDeclaration } from "@google/genai";
 import { BookingDetails, ConfirmationMessages, MenuCategory, Allergen, DietaryProfile, MenuItem } from '../types';
 
 // Support both Vite's `import.meta.env` and AI Studio's `process.env` for the API key.
-const apiKey = (import.meta as any).env?.VITE_API_KEY || (typeof process !== 'undefined' && process.env?.API_KEY);
+const apiKey = (import.meta as any).env?.VITE_API_KEY || (window as any).process?.env?.API_KEY;
 if (!apiKey) {
     throw new Error("API key not found. Please set VITE_API_KEY for Vite environments or ensure API_KEY is available in the AI Studio environment.");
 }
