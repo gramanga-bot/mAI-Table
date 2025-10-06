@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { DayOfWeek, AdminSettings as AdminSettingsType, Table, TableCombinationRule, BookingDurationRule, ServiceWindow, Plan, Theme } from '../types';
 import Icon from './Icon';
@@ -133,6 +132,9 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSetting
     const [saveMessage, setSaveMessage] = useState('');
     const saveTimeoutRef = useRef<number | null>(null);
 
+    const [dbTestStatus, setDbTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+    const [dbTestMessage, setDbTestMessage] = useState('');
+
     // This wrapper function shows the save confirmation message
     const handleSettingChange = (update: Partial<AdminSettingsType>) => {
         onUpdateSettings(update);
@@ -175,6 +177,24 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSetting
     // BASIC settings handler
     const handleMaxGuestsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         handleSettingChange({ maxGuestsPerSlot: parseInt(e.target.value, 10) || 0 });
+    };
+
+     const handleTestDbConnection = async () => {
+        setDbTestStatus('testing');
+        setDbTestMessage('');
+        try {
+            const response = await fetch('/api/db-test');
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.message || 'Errore sconosciuto');
+            }
+            setDbTestStatus('success');
+            setDbTestMessage(`Connessione riuscita! Ora del server: ${new Date(data.time).toLocaleString('it-IT')}`);
+        } catch (err) {
+            setDbTestStatus('error');
+            const errorMessage = err instanceof Error ? err.message : 'Si è verificato un errore.';
+            setDbTestMessage(`Connessione fallita: ${errorMessage}. Controlla le variabili d'ambiente del database in Vercel.`);
+        }
     };
 
     const DisabledSectionWrapper: React.FC<{ isDisabled: boolean; children: React.ReactNode; planName: 'PRO' | 'BASIC' }> = ({ isDisabled, children, planName }) => {
@@ -374,6 +394,33 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ settings, onUpdateSetting
                     currentTheme={settings.theme}
                     onThemeChange={theme => handleSettingChange({ theme })}
                 />
+            </div>
+
+             <div className="space-y-4">
+                <h3 className="text-xl font-bold text-[var(--text-primary)]">Diagnostica</h3>
+                 <div className="bg-[var(--background-primary)] p-4 rounded-lg border border-[var(--border-primary)]">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-[var(--text-secondary)] mb-2">Test Connessione Database</label>
+                            <p className="text-xs text-[var(--text-secondary)]/80 mb-3">Verifica che l'applicazione sia in grado di connettersi correttamente al database Postgres configurato su Vercel.</p>
+                            <button 
+                                onClick={handleTestDbConnection}
+                                disabled={dbTestStatus === 'testing'}
+                                className="w-full md:w-auto bg-[var(--accent-primary)]/80 text-[var(--accent-text)] font-bold py-2 px-4 rounded-lg hover:bg-[var(--accent-primary)] text-sm disabled:opacity-50 disabled:cursor-wait"
+                            >
+                                {dbTestStatus === 'testing' ? 'Test in corso...' : 'Esegui Test'}
+                            </button>
+                            {dbTestMessage && (
+                                <div className={`mt-4 p-3 rounded-lg text-sm ${
+                                    dbTestStatus === 'success' ? 'bg-[var(--positive-background)] text-[var(--positive-text)]' : 
+                                    dbTestStatus === 'error' ? 'bg-[var(--negative-background)] text-[var(--negative-text)]' : ''
+                                }`}>
+                                    {dbTestMessage}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
             
             {settings.activePlan === Plan.BASIC ? renderBasicSettings() : renderProSettings()}
